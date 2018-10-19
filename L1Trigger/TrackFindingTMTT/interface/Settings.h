@@ -209,6 +209,9 @@ public:
   unsigned int         minNumMatchPSLayers()     const   {return minNumMatchPSLayers_;}
   // Associate stub to TP only if the TP contributed to both its clusters? (If False, then associate even if only one cluster was made by TP).
   bool                 stubMatchStrict()         const   {return stubMatchStrict_;}
+  //== Tracklet Settings
+  // mean radius of barrel layers
+  vector<double>       radLayers()               const   {return radLayers_;}
 
   //=== Track Fitting Settings
 
@@ -411,6 +414,7 @@ private:
   edm::ParameterSet    l1TrackDef_;
   edm::ParameterSet    dupTrkRemoval_;
   edm::ParameterSet    trackMatchDef_;
+  edm::ParameterSet    trackletSettings_;
   edm::ParameterSet    trackFitSettings_;
   edm::ParameterSet    deadModuleOpts_;
   edm::ParameterSet    trackDigi_;
@@ -537,6 +541,10 @@ private:
   unsigned int         minNumMatchLayers_;
   unsigned int         minNumMatchPSLayers_;
   bool                 stubMatchStrict_;
+
+  // Tracklet
+  
+  vector<double>       radLayers_;
 
   // Track Fitting Settings
   vector<string>       trackFitters_;

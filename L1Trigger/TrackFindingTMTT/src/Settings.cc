@@ -23,6 +23,7 @@ Settings::Settings(const edm::ParameterSet& iConfig) :
   l1TrackDef_             ( iConfig.getParameter< edm::ParameterSet >         ( "L1TrackDef"             ) ),
   dupTrkRemoval_          ( iConfig.getParameter< edm::ParameterSet >         ( "DupTrkRemoval"          ) ),
   trackMatchDef_          ( iConfig.getParameter< edm::ParameterSet >         ( "TrackMatchDef"          ) ),
+  trackletSettings_       ( iConfig.getParameter< edm::ParameterSet >         ( "TrackletSettings"       ) ),
   trackFitSettings_       ( iConfig.getParameter< edm::ParameterSet >         ( "TrackFitSettings"       ) ),
   deadModuleOpts_         ( iConfig.getParameter< edm::ParameterSet >         ( "DeadModuleOpts"         ) ),
   trackDigi_              ( iConfig.getParameter< edm::ParameterSet >         ( "TrackDigi"              ) ),
@@ -156,6 +157,9 @@ Settings::Settings(const edm::ParameterSet& iConfig) :
   minNumMatchPSLayers_    ( trackMatchDef_.getParameter<unsigned int>         ( "MinNumMatchPSLayers"    ) ),
   stubMatchStrict_        ( trackMatchDef_.getParameter<bool>                 ( "StubMatchStrict"        ) ),
 
+  //=== Tracklet Params
+  radLayers_               ( trackletSettings_.getParameter<vector<double>>   ( "RadLayers"          ) ),
+  
   //=== Track Fitting Settings
 
   trackFitters_           ( trackFitSettings_.getParameter<vector<std::string>> ( "TrackFitters"         ) ),
@@ -208,7 +212,9 @@ Settings::Settings(const edm::ParameterSet& iConfig) :
   kalmanHOalpha_           ( trackFitSettings_.getParameter<unsigned int>     ( "KalmanHOalpha"          ) ),
   kalmanHOprojZcorr_       ( trackFitSettings_.getParameter<unsigned int>     ( "KalmanHOprojZcorr"      ) ),
   kalmanHOdodgy_           ( trackFitSettings_.getParameter<bool>             ( "KalmanHOdodgy"          ) ),
- 
+
+
+
   //=== Treatment of dead modules.
 
   deadReduceLayers_       (deadModuleOpts_.getParameter<bool>                 ( "DeadReduceLayers"       ) ),

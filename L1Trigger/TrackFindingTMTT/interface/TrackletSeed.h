@@ -10,9 +10,9 @@ namespace TMTT {
 
   public:
 
-   TrackletSeed(Stub* outerStub, Stub* innerStub);
+   TrackletSeed(Stub* outerStub, Stub* innerStub, unsigned int phiSec, const TMTT::Settings* settings);
    ~TrackletSeed(){};
-
+   
    void setSectorParams(unsigned int);
    unsigned int whichSeedType(Stub* outerStub, Stub* innerStub); 
    void barrelSeed(Stub* outerStub, Stub* innerStub);
@@ -32,10 +32,11 @@ namespace TMTT {
 
    Stub* innerStub_;
    Stub* outerStub_;
-   unsigned int PhiSec_, EtaSec_;
+   unsigned int phiSec_;
+   unsigned int etaSec_;
    double rInv_, phi0_, z0_, tanLambda_; //Track params
    double secPhiMin_, secPhiMax_;
-
+   const Settings* settings_;
  };
 }
 #endif
