@@ -10,12 +10,19 @@ namespace TMTT {
 
   public:
 
+  struct projection {
+  double phiProjection;
+  double zProjection;
+
+  double phiDerivitive;
+  double zDerivitive;
+ } ;
    TrackletSeed(Stub* outerStub, Stub* innerStub, unsigned int phiSec, const TMTT::Settings* settings);
    ~TrackletSeed(){};
-   
+   void makeTracklet();
    void setSectorParams(unsigned int);
    unsigned int whichSeedType(Stub* outerStub, Stub* innerStub); 
-   void barrelSeed(Stub* outerStub, Stub* innerStub);
+   void seed(Stub* outerStub, Stub* innerStub, double rProjection);
    void phiSec(unsigned int x);
    void etaSec(unsigned int x);
    void secPhiMax(double x);
