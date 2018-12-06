@@ -32,15 +32,15 @@ namespace TMTT{
   vector<projection> barrelProjections;
   vector<projection> endcapProjections;
 
-  switch( seedType() ){
+  switch( this->seedType() ){
    case 1:
       
     for( int layer = 0; layer < 4; ++layer ){
-    barrelProjections.push_back(projectBarrel(i));
+    barrelProjections.push_back(this->projectBarrel(layer));
     }
 
     for( int disk = 0; disk < 5; ++disk ){
-    endcapProjections.push_back(projectEndcap(i));
+    endcapProjections.push_back(this->projectEndcap(disk));
     }
   
     break;
@@ -48,30 +48,30 @@ namespace TMTT{
    case 2:
     
     for( int layer = 0; layer < 4; ++layer ){
-    barrelProjections.push_back(projectBarrel(i));
+    barrelProjections.push_back(this->projectBarrel(layer));
     }
 
     for( int disk = 0; disk < 5; ++disk ){
-    endcapProjections.push_back(projectEndcap(i));
+    endcapProjections.push_back(this->projectEndcap(disk));
     }
     
-    break
+    break;
    
    case 3:
     
     for( int layer = 0; layer < 4; ++layer ){
-    barrelProjections.push_back(projectBarrel(i));
+    barrelProjections.push_back(this->projectBarrel(layer));
     }
 
     for( int disk = 0; disk < 5; ++disk ){
-    endcapProjections.push_back(projectEndcap(i));
+    endcapProjections.push_back(this->projectEndcap(disk));
     }
      
      break;
 
    default:
 
-
+     break;
  }
 
  }
@@ -81,7 +81,9 @@ namespace TMTT{
  void TrackletSeed::etaSec(unsigned int x){etaSec_=x;}
  void TrackletSeed::secPhiMax(double x){secPhiMax_=x;}
  void TrackletSeed::secPhiMin(double x){secPhiMin_=x;}
+ void TrackletSeed::seedType(unsigned int x){seedType_=x;}
  unsigned int TrackletSeed::phiSec(){return phiSec_;}
+ unsigned int TrackletSeed::seedType(){return seedType_;}
  unsigned int TrackletSeed::etaSec(){return etaSec_;}
  double TrackletSeed::secPhiMax(){return secPhiMax_;}
  double TrackletSeed::secPhiMin(){return secPhiMin_;}
@@ -141,40 +143,54 @@ namespace TMTT{
    2*(asin(0.5*settings_->invPtToDphi()*innerStub->r()) - 
      asin(0.5*settings_->invPtToDphi()*outerStub->r()));
 
-  double z0 = innerStub->z() - tanLambda*(2*(asin(0.5*settings_->invPtToDphi()*innerStub->r()));
+  double z0 = innerStub->z() - tanLambda*(2*(asin(0.5*settings_->invPtToDphi()*innerStub->r())));
 
-  this->rInv(rInv);
-  this->z0(z0);
-  this->phi0(phi0);
-  this->tanLambda(tanLambda);
+  rInv_=rInv;
+  z0_=z0;
+  phi0_=phi0;
+  tanLambda_=tanLambda;
 
     }
 
 //////////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////////////
-  projection TrackletSeed::projectBarrel(double rProjection){
+  TrackletProjection TrackletSeed::projectBarrel(unsigned int rProjection){
   
-  double phiProjection = phi0() - asin ( 0.5 * rProjection * rInv());
+  double phiProjection = phi0_ - asin ( 0.5 * rProjection * rInv_);
   
-  double zProjection = z0() + 2 * tanLambda() * asin( 0.5 * rProjection * rInv());
+  double zProjection = z0_ + 2 * tanLambda_ * asin( 0.5 * rProjection * rInv_);
 
-  double phiDerivitive = - 0.5 * rInv() / sqrt( 1 - pow( 0.5 * rProjection * rInv() , 2 ) );
+  double phiDerivitive = - 0.5 * rInv_ / sqrt( 1 - pow( 0.5 * rProjection * rInv_ , 2 ) );
 
-  double zDerivitive = tanLambda() / sqrt( 1 - pow ( 0.5* rProjection * rInv() , 2 ) );
+  double zDerivitive = tanLambda_ / sqrt( 1 - pow ( 0.5* rProjection * rInv_ , 2 ) );
     
   }
 
-//////////////////////////////////////////////////////////////////////////////////////
-  projection TrackletSeed::projectEndcap(double rProjection){
-  
-  double phiProjection = phi0() - asin ( 0.5 * rProjection * rInv());
-  
-  double zProjection = z0() + 2 * tanLambda() * asin( 0.5 * rProjection * rInv());
+////////////////////////////////////////////////////////////////
 
-  double phiDerivitive = - 0.5 * rInv() / sqrt( 1 - pow( 0.5 * rProjection * rInv() , 2 ) );
 
-  double zDerivitive = tanLambda() / sqrt( 1 - pow ( 0.5* rProjection * rInv() , 2 ) );
-    
-  }
-//////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
+TrackletProjection projectEndcap(unsigned int numDisk){
+
+double zProjection = this->endcapProj.at( numDisk );
+
+if( tanLambda_ < 0 ){
+zProjection = -zProjection;
+}
+
+double tmp = rInv * ( zProjection - z0_ ) / 2.0 * tanLambda_;
+
+double rProjection = 2.0 * sin( tmp ) / rInv_;
+
+double phiProjection = phi0_ - tmp;
+
+double phiDerivitive = - 0.5 * rInv_ / tanLambda_;
+
+double rDerivitive = cos( tmp ) / tanLambda_;
+
+projection Projection(rProjection, zProjection, phiProjection, rDerivitive, 0, phiDerivitive);
+
+return projection;
+}
+/////////////////////////////////////////////////////////////
