@@ -22,25 +22,26 @@ namespace TMTT {
    void makeTracklet();
    void setSectorParams(unsigned int);
    unsigned int whichSeedType(Stub* outerStub, Stub* innerStub); 
-   void seed(Stub* outerStub, Stub* innerStub, double rProjection);
+   void seed(Stub* outerStub, Stub* innerStub, unsigned int seedType);
    void phiSec(unsigned int x);
    void etaSec(unsigned int x);
    void secPhiMax(double x);
    void secPhiMin(double x);
+   void seedType(unsigned int x);
+   projection projectBarrel(unsigned int rProjection);
+   projection projectEndcap(unsigned int rProjection);
 
    unsigned int phiSec();
+   unsigned int seedType();
    unsigned int etaSec();
    double secPhiMax();
    double secPhiMin();
 
   private:
 
-   unsigned int seedType_;
-
    Stub* innerStub_;
    Stub* outerStub_;
-   unsigned int phiSec_;
-   unsigned int etaSec_;
+   unsigned int phiSec_, etaSec_, seedType_;
    double rInv_, phi0_, z0_, tanLambda_; //Track params
    double secPhiMin_, secPhiMax_;
    const Settings* settings_;
