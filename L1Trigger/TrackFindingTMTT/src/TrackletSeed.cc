@@ -2,12 +2,13 @@
 #include "L1Trigger/TrackFindingTMTT/interface/Stub.h"
 #include "L1Trigger/TrackFindingTMTT/interface/Utility.h"
 #include "L1Trigger/TrackFindingTMTT/interface/StubCluster.h"
+#include "L1Trigger/TrackFindingTMTT/interface/TrackletProjection.h"
 
 
 using namespace std;
 namespace TMTT{
 
-//////////////////////////////////////////////////////////////////////////////////////
+ //////////////////////////////////////////////////////////////////////////////////////
  TrackletSeed::TrackletSeed(Stub* outerStub, Stub* innerStub, unsigned int phiSec, 
    const Settings* settings):
   settings_(settings)
@@ -17,8 +18,8 @@ namespace TMTT{
 
   if(!seedType){std::cout << "seedType not valid" << std::endl; assert(0);}
 
-  this->setSectorParams(phiSec);
-  
+  this->setSectorParams(phiSec); 
+
   this->seed(outerStub, innerStub, seedType);
   
   makeTracklet();
@@ -29,53 +30,53 @@ namespace TMTT{
 
  void TrackletSeed::makeTracklet(){
 
-  vector<projection> barrelProjections;
-  vector<projection> endcapProjections;
+  vector<TrackletProjection> barrelProjections;
+  vector<TrackletProjection> endcapProjections;
 
   switch( this->seedType() ){
    case 1:
-      
+
     for( int layer = 0; layer < 4; ++layer ){
-    barrelProjections.push_back(this->projectBarrel(layer));
+     barrelProjections.push_back(this->projectBarrel(layer));
     }
 
     for( int disk = 0; disk < 5; ++disk ){
-    endcapProjections.push_back(this->projectEndcap(disk));
+     endcapProjections.push_back(this->projectEndcap(disk));
     }
-  
+
     break;
 
    case 2:
-    
+
     for( int layer = 0; layer < 4; ++layer ){
-    barrelProjections.push_back(this->projectBarrel(layer));
+     barrelProjections.push_back(this->projectBarrel(layer));
     }
 
     for( int disk = 0; disk < 5; ++disk ){
-    endcapProjections.push_back(this->projectEndcap(disk));
+     endcapProjections.push_back(this->projectEndcap(disk));
     }
-    
+
     break;
-   
+
    case 3:
-    
+
     for( int layer = 0; layer < 4; ++layer ){
-    barrelProjections.push_back(this->projectBarrel(layer));
+     barrelProjections.push_back(this->projectBarrel(layer));
     }
 
     for( int disk = 0; disk < 5; ++disk ){
-    endcapProjections.push_back(this->projectEndcap(disk));
+     endcapProjections.push_back(this->projectEndcap(disk));
     }
-     
-     break;
+
+    break;
 
    default:
 
-     break;
- }
+    break;
+  }
 
  }
-//////////////////////////////////////////////////////////////////////////////////////
+ //////////////////////////////////////////////////////////////////////////////////////
 
  void TrackletSeed::phiSec(unsigned int x){phiSec_=x;}
  void TrackletSeed::etaSec(unsigned int x){etaSec_=x;}
@@ -88,8 +89,12 @@ namespace TMTT{
  double TrackletSeed::secPhiMax(){return secPhiMax_;}
  double TrackletSeed::secPhiMin(){return secPhiMin_;}
 
- 
-//////////////////////////////////////////////////////////////////////////////////////
+ double TrackletSeed::phi0(){return phi0_;}
+ double TrackletSeed::rInv(){return rInv_;}
+ double TrackletSeed::tanLambda(){return tanLambda_;}
+ double TrackletSeed::z0(){return z0_;}
+
+ //////////////////////////////////////////////////////////////////////////////////////
  void TrackletSeed::setSectorParams(unsigned int phiSec){
 
   this->phiSec(phiSec);
@@ -102,9 +107,9 @@ namespace TMTT{
   secPhiMax(Utility::wrapRadian(secPhiMin() + 2*M_PI/settings_->numPhiSectors() + 2*dphiSec));
  }
 
-//////////////////////////////////////////////////////////////////////////////////////
+ //////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////
+ //////////////////////////////////////////////////////////////////////////////////////
  unsigned int TrackletSeed::whichSeedType(Stub* outerStub, Stub* innerStub){ //returns 1 for barrel, 2 for disk, 3 for overlap
 
   if(innerStub->barrel() && outerStub->endcapRing()){
@@ -118,10 +123,10 @@ namespace TMTT{
   else return 0;
 
  }
-//////////////////////////////////////////////////////////////////////////////////////
+ //////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////
- void TrackletSeed::seed(Stub* outerStub, Stub* innerStub, unsigned int seedType){
+ //////////////////////////////////////////////////////////////////////////////////////
+ void TrackletSeed::seed(Stub* outerStub, Stub* innerStub, unsigned int seedType){ //Calculates initial helix parameters of tracklets
 
   double deltaPhi = Utility::wrapRadian(outerStub->phi() - innerStub->phi());
 
@@ -131,7 +136,7 @@ namespace TMTT{
   double rInv = 2*sin(deltaPhi)/displacement;
 
   if(seedType==2 && innerStub->r() > innerStub->r()){
-  
+
    rInv = -rInv;
 
   }
@@ -150,47 +155,54 @@ namespace TMTT{
   phi0_=phi0;
   tanLambda_=tanLambda;
 
-    }
+ }
 
-//////////////////////////////////////////////////////////////////////////////////////
+ //////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////
-  TrackletProjection TrackletSeed::projectBarrel(unsigned int rProjection){
-  
+ //////////////////////////////////////////////////////////////////////////////////////
+ TrackletProjection TrackletSeed::projectBarrel(unsigned int layer){ //Projects seed to layer
+
+  double rProjection = settings_->layerRadii().at( layer ); 
+
   double phiProjection = phi0_ - asin ( 0.5 * rProjection * rInv_);
-  
+
   double zProjection = z0_ + 2 * tanLambda_ * asin( 0.5 * rProjection * rInv_);
 
   double phiDerivitive = - 0.5 * rInv_ / sqrt( 1 - pow( 0.5 * rProjection * rInv_ , 2 ) );
 
   double zDerivitive = tanLambda_ / sqrt( 1 - pow ( 0.5* rProjection * rInv_ , 2 ) );
-    
+
+  TrackletProjection projection(rProjection, zProjection, phiProjection, 0, zDerivitive, phiDerivitive);
+
+  return projection;
+ }
+
+ ////////////////////////////////////////////////////////////////
+
+
+ /////////////////////////////////////////////////////////////////
+ TrackletProjection TrackletSeed::projectEndcap(unsigned int numDisk){ //Projects seed to disk
+ 
+  double zProjection = settings_->diskZ().at( numDisk );
+
+  if( tanLambda_ < 0 ){
+   zProjection = -zProjection;
   }
 
-////////////////////////////////////////////////////////////////
+  double tmp = rInv_ * ( zProjection - z0_ ) / 2.0 * tanLambda_;
 
+  double rProjection = 2.0 * sin( tmp ) / rInv_;
 
-/////////////////////////////////////////////////////////////////
-TrackletProjection projectEndcap(unsigned int numDisk){
+  double phiProjection = phi0_ - tmp;
 
-double zProjection = this->endcapProj.at( numDisk );
+  double phiDerivitive = - 0.5 * rInv_ / tanLambda_;
 
-if( tanLambda_ < 0 ){
-zProjection = -zProjection;
+  double rDerivitive = cos( tmp ) / tanLambda_;
+
+  TrackletProjection projection(rProjection, zProjection, phiProjection, rDerivitive, 0, phiDerivitive);
+
+  return projection;
+ }
+
 }
-
-double tmp = rInv * ( zProjection - z0_ ) / 2.0 * tanLambda_;
-
-double rProjection = 2.0 * sin( tmp ) / rInv_;
-
-double phiProjection = phi0_ - tmp;
-
-double phiDerivitive = - 0.5 * rInv_ / tanLambda_;
-
-double rDerivitive = cos( tmp ) / tanLambda_;
-
-projection Projection(rProjection, zProjection, phiProjection, rDerivitive, 0, phiDerivitive);
-
-return projection;
-}
-/////////////////////////////////////////////////////////////
+ /////////////////////////////////////////////////////////////

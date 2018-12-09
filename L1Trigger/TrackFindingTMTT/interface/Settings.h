@@ -400,6 +400,9 @@ public:
   void                 setBfield(float bField)           {bField_ = bField;}
   float                getBfield()               const   {if (bField_ == 0.) throw cms::Exception("Settings.h:You attempted to access the B field before it was initialized"); return bField_;}
 
+  std::vector<double> layerRadii() const {return layerRadii_;};
+  std::vector<double> diskZ() const {return diskZ_;}
+
 private:
 
   // Parameter sets for differents types of configuration parameter.
@@ -419,6 +422,7 @@ private:
   edm::ParameterSet    trackFitSettings_;
   edm::ParameterSet    deadModuleOpts_;
   edm::ParameterSet    trackDigi_;
+  edm::ParameterSet    tracklet_;
 
   // General settings
   bool                 enableMCtruth_;
@@ -652,6 +656,9 @@ private:
 
   // B-field in Tesla
   float                bField_;
+
+//simple-tracklet seeding
+  std::vector<double> layerRadii_, diskZ_;
 };
 
 }

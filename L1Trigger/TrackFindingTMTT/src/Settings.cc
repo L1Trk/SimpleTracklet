@@ -27,6 +27,7 @@ Settings::Settings(const edm::ParameterSet& iConfig) :
   trackFitSettings_       ( iConfig.getParameter< edm::ParameterSet >         ( "TrackFitSettings"       ) ),
   deadModuleOpts_         ( iConfig.getParameter< edm::ParameterSet >         ( "DeadModuleOpts"         ) ),
   trackDigi_              ( iConfig.getParameter< edm::ParameterSet >         ( "TrackDigi"              ) ),
+  tracklet_               ( iConfig.getParameter< edm::ParameterSet >         ( "Tracklet"               ) ),
 
   //=== General settings
 
@@ -267,7 +268,11 @@ Settings::Settings(const edm::ParameterSet& iConfig) :
   writeOutEdmFile_        ( iConfig.getUntrackedParameter<bool>               ( "WriteOutEdmFile", true) ),
 
   // Bfield in Tesla. (Unknown at job initiation. Set to true value for each event
-  bField_                 (0.)
+  bField_                 (0.),
+
+  //simple-tracklet
+  layerRadii_ (tracklet_.getParameter<std::vector<double>>                    ( "layerRadii"            ) ),
+  diskZ_      (tracklet_.getParameter<std::vector<double>>                    ( "diskZ"            ) )
 
 {
   // If user didn't specify any PDG codes, use e,mu,pi,K,p, to avoid picking up unstable particles like Xi-.
