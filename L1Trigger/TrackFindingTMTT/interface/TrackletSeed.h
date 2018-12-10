@@ -43,6 +43,9 @@ namespace TMTT {
    void setZ0(double z0);
    void setTanLambda(double tanLambda);
 
+   std::vector<TrackletProjection> barrelProjections();
+   std::vector<TrackletProjection> diskProjections();
+ 
   private:
 
    Stub* innerStub_;
@@ -50,7 +53,9 @@ namespace TMTT {
    unsigned int phiSec_, etaSec_, seedType_;
    double rInv_, phi0_, z0_, tanLambda_; //Track params
    double secPhiMin_, secPhiMax_;
-   std::vector <TrackletProjection> projections; 
+   std::vector <TrackletProjection> barrelProjections_; 
+   std::vector <TrackletProjection> diskProjections_; 
+
    const Settings* settings_;
  };
 

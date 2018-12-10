@@ -30,18 +30,16 @@ namespace TMTT{
 
  void TrackletSeed::makeTracklet(){
 
-  vector<TrackletProjection> barrelProjections;
-  vector<TrackletProjection> endcapProjections;
 
   switch( this->seedType() ){
    case 1:
 
     for( int layer = 0; layer < 4; ++layer ){
-     barrelProjections.push_back(this->projectBarrel(layer));
+     barrelProjections_.push_back(this->projectBarrel(layer));
     }
 
     for( int disk = 0; disk < 5; ++disk ){
-     endcapProjections.push_back(this->projectEndcap(disk));
+     diskProjections_.push_back(this->projectEndcap(disk));
     }
 
     break;
@@ -49,11 +47,11 @@ namespace TMTT{
    case 2:
 
     for( int layer = 0; layer < 4; ++layer ){
-     barrelProjections.push_back(this->projectBarrel(layer));
+     barrelProjections_.push_back(this->projectBarrel(layer));
     }
 
     for( int disk = 0; disk < 5; ++disk ){
-     endcapProjections.push_back(this->projectEndcap(disk));
+     diskProjections_.push_back(this->projectEndcap(disk));
     }
 
     break;
@@ -61,11 +59,11 @@ namespace TMTT{
    case 3:
 
     for( int layer = 0; layer < 4; ++layer ){
-     barrelProjections.push_back(this->projectBarrel(layer));
+     barrelProjections_.push_back(this->projectBarrel(layer));
     }
 
     for( int disk = 0; disk < 5; ++disk ){
-     endcapProjections.push_back(this->projectEndcap(disk));
+     diskProjections_.push_back(this->projectEndcap(disk));
     }
 
     break;
@@ -93,6 +91,9 @@ namespace TMTT{
  double TrackletSeed::rInv(){return rInv_;}
  double TrackletSeed::tanLambda(){return tanLambda_;}
  double TrackletSeed::z0(){return z0_;}
+
+ std::vector<TrackletProjection> TrackletSeed::barrelProjections(){return barrelProjections_;}
+ std::vector<TrackletProjection> TrackletSeed::diskProjections(){return diskProjections_;}
 
  //////////////////////////////////////////////////////////////////////////////////////
  void TrackletSeed::setSectorParams(unsigned int phiSec){

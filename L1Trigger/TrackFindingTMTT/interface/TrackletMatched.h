@@ -2,24 +2,32 @@
 #define __TRACKLETMATCHED_H__
 
 #include <vector>
+#include "L1Trigger/TrackFindingTMTT/interface/Stub.h"
+#include "L1Trigger/TrackFindingTMTT/interface/TrackletWindows.h"
+#include "L1Trigger/TrackFindingTMTT/interface/TrackletSeed.h"
+
 
 using namespace std;
 
 namespace TMTT {
+ class Stub;
+ class TrackletWindows;
+ class TrackletSeed;
 
 class TrackletMatched{
 
  public:
   
-  TrackletMatched( TrackletSeed tracklet );
+  TrackletMatched( TrackletSeed* tracklet, Settings* settings );
   ~TrackletMatched(){};
 
-  void TrackletMatch( Stub* stub );
+  void MatchStub( Stub* stub, TrackletWindows* windows );
 
  private:
   
-  std::vector <Stub* stub> stublist_; 
-
+  TrackletSeed* tracklet_;
+  Settings* settings_;
+  std::vector < Stub* > stublist_; 
 };
 
 }
