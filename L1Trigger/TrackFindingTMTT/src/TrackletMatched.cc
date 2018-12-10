@@ -5,16 +5,18 @@
 
 namespace TMTT{
 
+ ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
  TrackletMatched::TrackletMatched(TrackletSeed* tracklet, Settings* settings) :
   tracklet_(tracklet),
   settings_(settings)
  {
-
  };
 
+ ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
+ ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
  void TrackletMatched::MatchLayerStub( Stub* stub, TrackletWindows* windows){
 
   unsigned int layer = stub->layerId();//layer must go from 0-5
@@ -29,19 +31,22 @@ namespace TMTT{
 
   double layerRadii = settings_->layerRadii().at(layer); 
 
-  bool match = ( deltaPhi < windows->phiMatchingWindowsBarrel[layer][tracklet_->seedType()] / layerRadii && 
-    deltaZ < windows->zMatchingWindowsBarrel[layer][tracklet_->seedType()] / layerRadii );
+  //Execute stub matching conditions here, seedType must be extended format 0-7
+  bool match = ( std::fabs(deltaPhi) < windows->phiMatchingWindowsBarrel[layer][tracklet_->seedType()] / layerRadii && 
+    std::fabs(deltaZ) < windows->zMatchingWindowsBarrel[layer][tracklet_->seedType()] / layerRadii );
 
   if(match){stublist_.push_back(stub);}
  }
+ ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+ ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
  void TrackletMatched::MatchDiskStub( Stub* stub, TrackletWindows* windows){
 
-  unsigned int disk = stub->layerId();//layer must go from 0-5
+  unsigned int disk = stub->layerId();//disk must go from 0-4
 
-  if(disk > 20){//encoded for endcap B
+  if(disk > 20){//encoded for endcap B between 21 and 25
    disk-=21;
-  }else{
+  }else{ //encoded for endcap A between 11 and 15
    disk-=11;
   }
 
@@ -49,18 +54,25 @@ namespace TMTT{
 
   double deltaPhi = stub->phi() - tracklet_->diskProjections().at(disk).phiProjection() - deltaZ * tracklet_->diskProjections().at(disk).phiDerivitive();
 
-  double deltaR = stub->r() - tracklet_->diskProjections().at(disk).rProjection() - deltaZ * tracklet_->diskProjections().at(layer).rDerivitive();
+  double deltaR = stub->r() - tracklet_->diskProjections().at(disk).rProjection() - deltaZ * tracklet_->diskProjections().at(disk).rDerivitive();
 
-  deltaPhi += deltaR * stub->alpha();
- 
-  
-  double layerR = settings_->layerRadii().at(disk); 
+  //alpha corrections go here, not yet added as some confusion re alpha vs alphanew
+  //deltaPhi += deltaR * stub->alpha();
+  //drphi+=dr*alphanew*4.57/stub->r();
+  double deltaRphi = deltaPhi*stub->r();
 
-  bool match = ( deltaPhi < windows->phiMatchingWindowsBarrel[layer][tracklet_->seedType()] / layerRadii && 
-    deltaZ < windows->zMatchingWindowsBarrel[layer][tracklet_->seedType()] / layerRadii );
+  bool match;
+  //Execute stub matching conditions here, seedType must be extended format 0-7
+  if (!stub->psModule()){
+   match = std::fabs(deltaRphi) < windows->rphiMatchingWindowsDisk2S[disk][tracklet_->seedType()] && 
+    std::fabs(deltaR) < windows->rMatchingWindowsDisk2S[disk][tracklet_->seedType()]; 
+  }else{
+   match = std::fabs(deltaRphi) < windows->rphiMatchingWindowsDiskPS[disk][tracklet_->seedType()] && 
+    std::fabs(deltaR) < windows->rMatchingWindowsDiskPS[disk][tracklet_->seedType()]; 
+  }
 
   if(match){stublist_.push_back(stub);}
  }
-
+ ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 };

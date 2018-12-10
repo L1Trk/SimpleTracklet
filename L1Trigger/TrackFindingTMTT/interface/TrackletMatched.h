@@ -21,7 +21,8 @@ class TrackletMatched{
   TrackletMatched( TrackletSeed* tracklet, Settings* settings );
   ~TrackletMatched(){};
 
-  void MatchStub( Stub* stub, TrackletWindows* windows );
+  void MatchLayerStub( Stub* stub, TrackletWindows* windows );
+  void MatchDiskStub(  Stub* stub, TrackletWindows* windows );
 
  private:
   
