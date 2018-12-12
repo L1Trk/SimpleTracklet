@@ -23,11 +23,10 @@ Settings::Settings(const edm::ParameterSet& iConfig) :
   l1TrackDef_             ( iConfig.getParameter< edm::ParameterSet >         ( "L1TrackDef"             ) ),
   dupTrkRemoval_          ( iConfig.getParameter< edm::ParameterSet >         ( "DupTrkRemoval"          ) ),
   trackMatchDef_          ( iConfig.getParameter< edm::ParameterSet >         ( "TrackMatchDef"          ) ),
-  trackletSettings_       ( iConfig.getParameter< edm::ParameterSet >         ( "TrackletSettings"       ) ),
   trackFitSettings_       ( iConfig.getParameter< edm::ParameterSet >         ( "TrackFitSettings"       ) ),
   deadModuleOpts_         ( iConfig.getParameter< edm::ParameterSet >         ( "DeadModuleOpts"         ) ),
   trackDigi_              ( iConfig.getParameter< edm::ParameterSet >         ( "TrackDigi"              ) ),
-  tracklet_               ( iConfig.getParameter< edm::ParameterSet >         ( "Tracklet"               ) ),
+  trackletSettings_       ( iConfig.getParameter< edm::ParameterSet >         ( "TrackletSettings"       ) ),
 
   //=== General settings
 
@@ -271,8 +270,9 @@ Settings::Settings(const edm::ParameterSet& iConfig) :
   bField_                 (0.),
 
   //simple-tracklet
-  layerRadii_ (tracklet_.getParameter<std::vector<double>>                    ( "layerRadii"            ) ),
-  diskZ_      (tracklet_.getParameter<std::vector<double>>                    ( "diskZ"            ) )
+  tracklet_   (trackletSettings_.getParameter<bool>                                   ( "tracklet"              ) ),
+  layerRadii_ (trackletSettings_.getParameter<std::vector<double>>                    ( "layerRadii"            ) ),
+  diskZ_      (trackletSettings_.getParameter<std::vector<double>>                    ( "diskZ"                 ) )
 
 {
   // If user didn't specify any PDG codes, use e,mu,pi,K,p, to avoid picking up unstable particles like Xi-.

@@ -13,22 +13,24 @@ namespace TMTT {
 
   public:
 
-   TrackletSeed(Stub* outerStub, Stub* innerStub, unsigned int phiSec, const TMTT::Settings* settings);
+   TrackletSeed(const Stub* outerStub, const Stub* innerStub, unsigned int phiSec, const TMTT::Settings* settings);
    ~TrackletSeed(){};
    void makeTracklet();
    void setSectorParams(unsigned int);
-   unsigned int whichSeedType(Stub* outerStub, Stub* innerStub); 
-   void seed(Stub* outerStub, Stub* innerStub, unsigned int seedType);
+   unsigned int whichSeedTypeReduced(const Stub* outerStub, const Stub* innerStub); 
+   unsigned int whichSeedTypeFull(const Stub* outerStub, const Stub* innerStub); 
+   void storeSeedType(Stub* outerStub, Stub* innerStub); 
+   void seed(const Stub* outerStub, const Stub* innerStub, unsigned int seedType);
    void phiSec(unsigned int x);
    void etaSec(unsigned int x);
    void secPhiMax(double x);
    void secPhiMin(double x);
-   void seedType(unsigned int x);
    TrackletProjection projectBarrel(unsigned int rProjection);
    TrackletProjection projectEndcap(unsigned int rProjection);
 
    unsigned int phiSec();
-   unsigned int seedType();
+   unsigned int seedTypeReduced();
+   unsigned int seedTypeFull();
    unsigned int etaSec();
    double secPhiMax();
    double secPhiMin();
@@ -37,6 +39,7 @@ namespace TMTT {
    double phi0();
    double z0();
    double tanLambda();
+    
 
    void setRInv(double rInv);
    void setPhi0(double phi0);
@@ -50,12 +53,11 @@ namespace TMTT {
 
    Stub* innerStub_;
    Stub* outerStub_;
-   unsigned int phiSec_, etaSec_, seedType_;
+   unsigned int phiSec_, etaSec_, seedTypeFull_, seedTypeReduced_;
    double rInv_, phi0_, z0_, tanLambda_; //Track params
    double secPhiMin_, secPhiMax_;
    std::vector <TrackletProjection> barrelProjections_; 
    std::vector <TrackletProjection> diskProjections_; 
-
    const Settings* settings_;
  };
 

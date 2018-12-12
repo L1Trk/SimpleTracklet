@@ -9,19 +9,22 @@ using namespace std;
 namespace TMTT{
 
  //////////////////////////////////////////////////////////////////////////////////////
- TrackletSeed::TrackletSeed(Stub* outerStub, Stub* innerStub, unsigned int phiSec, 
+ TrackletSeed::TrackletSeed(const Stub* outerStub, const Stub* innerStub, unsigned int phiSec, 
    const Settings* settings):
   settings_(settings)
  {
 
-  unsigned int seedType =  TrackletSeed::whichSeedType(outerStub, innerStub);
+  seedTypeReduced_ =  TrackletSeed::whichSeedTypeReduced(outerStub, innerStub);
+  
+  seedTypeFull_ = TrackletSeed::whichSeedTypeFull(outerStub, innerStub);
 
-  if(!seedType){std::cout << "seedType not valid" << std::endl; assert(0);}
-
+  if(!seedTypeReduced_){std::cout << "seedType not valid" << std::endl; assert(0);}
+  
+   
   this->setSectorParams(phiSec); 
 
-  this->seed(outerStub, innerStub, seedType);
-  
+  this->seed(outerStub, innerStub, seedTypeReduced_);
+
   makeTracklet();
 
  }
@@ -31,7 +34,7 @@ namespace TMTT{
  void TrackletSeed::makeTracklet(){
 
 
-  switch( this->seedType() ){
+  switch( seedTypeReduced_ ){
    case 1:
 
     for( int layer = 0; layer < 4; ++layer ){
@@ -80,9 +83,9 @@ namespace TMTT{
  void TrackletSeed::etaSec(unsigned int x){etaSec_=x;}
  void TrackletSeed::secPhiMax(double x){secPhiMax_=x;}
  void TrackletSeed::secPhiMin(double x){secPhiMin_=x;}
- void TrackletSeed::seedType(unsigned int x){seedType_=x;}
  unsigned int TrackletSeed::phiSec(){return phiSec_;}
- unsigned int TrackletSeed::seedType(){return seedType_;}
+ unsigned int TrackletSeed::seedTypeReduced(){return seedTypeReduced_;}
+ unsigned int TrackletSeed::seedTypeFull(){return seedTypeFull_;}
  unsigned int TrackletSeed::etaSec(){return etaSec_;}
  double TrackletSeed::secPhiMax(){return secPhiMax_;}
  double TrackletSeed::secPhiMin(){return secPhiMin_;}
@@ -111,7 +114,73 @@ namespace TMTT{
  //////////////////////////////////////////////////////////////////////////////////////
 
  //////////////////////////////////////////////////////////////////////////////////////
- unsigned int TrackletSeed::whichSeedType(Stub* outerStub, Stub* innerStub){ //returns 1 for barrel, 2 for disk, 3 for overlap
+
+ unsigned int TrackletSeed::whichSeedTypeFull(const Stub* outerStub, const Stub* innerStub){ //returns seed type index 0-7, matches tracklet emu
+  /*
+     index Seeding
+     0     L1L2
+     1     L3L4
+     2     L5L6
+     3     D1D2
+     4     D3D4
+     5     L1D1
+     6     L2D1
+     7     L2L3
+     */
+
+  if(seedTypeReduced_ == 1){
+
+   switch (innerStub->layerId() ){
+    case 1:
+     return 0;
+    case 2:
+     return 7;
+    case 3:
+     return 1;
+    case 5:
+     return 2;
+    default:
+     assert(0);
+   }
+
+  }
+  
+  if(seedTypeReduced_ == 2){
+
+   innerStub->layerId() > 20 ? innerStub->layerId() - 20 :  innerStub->layerId() - 10;  
+   unsigned int disk = innerStub->layerId();
+
+   switch (disk) {
+    case 1:
+     return 3;
+    case 3:
+     return 4;
+    default:
+     assert(0);
+   }
+
+  }
+  
+  if(seedTypeReduced_ == 3){
+
+   switch (innerStub->layerId()){
+    case 1:
+     return 5;
+    case 2:
+     return 6;
+    default:
+     assert(0);
+   }
+
+  }
+  return 0;
+ } 
+
+ //////////////////////////////////////////////////////////////////////////////////////
+
+ //////////////////////////////////////////////////////////////////////////////////////
+ unsigned int TrackletSeed::whichSeedTypeReduced(const Stub* outerStub, const Stub* innerStub){ 
+  //Simple seed type 1-3, returns 1 for barrel, 2 for disk, 3 for overlap
 
   if(innerStub->barrel() && outerStub->endcapRing()){
    return 3;}
@@ -121,13 +190,14 @@ namespace TMTT{
 
   else if(innerStub->endcapRing() && outerStub->endcapRing()){
    return 2;}
+
   else return 0;
 
  }
  //////////////////////////////////////////////////////////////////////////////////////
 
  //////////////////////////////////////////////////////////////////////////////////////
- void TrackletSeed::seed(Stub* outerStub, Stub* innerStub, unsigned int seedType){ //Calculates initial helix parameters of tracklets
+ void TrackletSeed::seed(const Stub* outerStub, const Stub* innerStub, unsigned int seedType){ //Calculates initial helix parameters of tracklets
 
   double deltaPhi = Utility::wrapRadian(outerStub->phi() - innerStub->phi());
 
@@ -183,7 +253,7 @@ namespace TMTT{
 
  /////////////////////////////////////////////////////////////////
  TrackletProjection TrackletSeed::projectEndcap(unsigned int numDisk){ //Projects seed to disk
- 
+
   double zProjection = settings_->diskZ().at( numDisk );
 
   if( tanLambda_ < 0 ){
@@ -206,4 +276,4 @@ namespace TMTT{
  }
 
 }
- /////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////

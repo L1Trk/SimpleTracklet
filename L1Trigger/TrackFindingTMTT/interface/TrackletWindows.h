@@ -41,29 +41,29 @@ namespace TMTT{
     rphiMatchingWindowsDisk2S //first index (row) is disk number, second index (column) is tracklet seed type
      //zero elements are unused
     {
-      { 0,    0,    0,    0,    0,    0,    0,    0    },//disk 1 rphi windows
-      { 0,    0,    0,    0,    0,    0,    0,    0    },//disk 2 rphi windows
-      { 0,    0,    0,    0,    0,    0,    0,    0    },//disk 3 rphi windows
-      { 0,    0,    0,    0,    0,    0,    0,    0    },//disk 4 rphi windows
-      { 0,    0,    0,    0,    0,    0,    0,    0    } //disk 5 rphi windows
+      { 0.5,  0.8,  0,    0,    0.1,  0,    0,    0.5  },//disk 1 rphi windows
+      { 0.5,  0.8,  0,    0,    0,    0.5,  0.15, 0.5  },//disk 2 rphi windows
+      { 0.5,  0,    0,    0.15, 0,    0.2,  0.25, 0.5  },//disk 3 rphi windows
+      { 0.5,  0,    0,    0.2,  0,    0.25, 0.5,  0.5  },//disk 4 rphi windows
+      { 0,    0,    0,    0.4,  0.2,  0.4,  0,    0    } //disk 5 rphi windows
     },
     rMatchingWindowsDiskPS //first index (row) is disk number, second index (column) is tracklet seed type
      //zero elements are unused
     {
-      { 0,    0,    0,    0,    0,    0,    0,    0    },//disk 1 r windows
-      { 0,    0,    0,    0,    0,    0,    0,    0    },//disk 2 r windows
-      { 0,    0,    0,    0,    0,    0,    0,    0    },//disk 3 r windows
-      { 0,    0,    0,    0,    0,    0,    0,    0    },//disk 4 r windows
-      { 0,    0,    0,    0,    0,    0,    0,    0    } //disk 5 r windows
+      { 0.5,    0,    0,    0,    0.5,    0,    0,    0.5    },//disk 1 r windows
+      { 0.5,    0,    0,    0,    0.5,    0.5,  0.5,  0.5    },//disk 2 r windows
+      { 0.5,    0,    0,    0.5,    0,    0.6,  0.8,  0.5    },//disk 3 r windows
+      { 0.5,    0,    0,    0.8,    0,    1.0,  1.0,  0.5    },//disk 4 r windows
+      { 0,      0,    0,    1.0,  0.5,    2.0,  0,    0      } //disk 5 r windows
     },
     rMatchingWindowsDisk2S //first index (row) is disk number, second index (column) is tracklet seed type
      //zero elements are unused
     {
-      { 0,    0,    0,    0,    0,    0,    0,    0    },//disk 1 r windows
-      { 0,    0,    0,    0,    0,    0,    0,    0    },//disk 2 r windows
-      { 0,    0,    0,    0,    0,    0,    0,    0    },//disk 3 r windows
-      { 0,    0,    0,    0,    0,    0,    0,    0    },//disk 4 r windows
-      { 0,    0,    0,    0,    0,    0,    0,    0    } //disk 5 r windows
+      { 3.8,  3.8,  0,    0,    0,    0,    0,    3.8    },//disk 1 r windows
+      { 3.8,  3.8,  0,    0,    0,    3.8,  3.4,  3.8    },//disk 2 r windows
+      { 3.6,  0,    0,    3.6,  0,    3.6,  3.8,  3.8    },//disk 3 r windows
+      { 3.6,  0,    0,    3.6,  0,    3.5,  3.8,  3.8    },//disk 4 r windows
+      { 0,    0,    0,    3.6,  3.4,  3.7,  0,    0      } //disk 5 r windows
     }
    {}
 

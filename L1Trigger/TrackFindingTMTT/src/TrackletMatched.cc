@@ -32,8 +32,8 @@ namespace TMTT{
   double layerRadii = settings_->layerRadii().at(layer); 
 
   //Execute stub matching conditions here, seedType must be extended format 0-7
-  bool match = ( std::fabs(deltaPhi) < windows->phiMatchingWindowsBarrel[layer][tracklet_->seedType()] / layerRadii && 
-    std::fabs(deltaZ) < windows->zMatchingWindowsBarrel[layer][tracklet_->seedType()] / layerRadii );
+  bool match = ( std::fabs(deltaPhi) < windows->phiMatchingWindowsBarrel[layer][tracklet_->seedTypeFull()] / layerRadii && 
+    std::fabs(deltaZ) < windows->zMatchingWindowsBarrel[layer][tracklet_->seedTypeFull()] / layerRadii );
 
   if(match){stublist_.push_back(stub);}
  }
@@ -64,11 +64,11 @@ namespace TMTT{
   bool match;
   //Execute stub matching conditions here, seedType must be extended format 0-7
   if (!stub->psModule()){
-   match = std::fabs(deltaRphi) < windows->rphiMatchingWindowsDisk2S[disk][tracklet_->seedType()] && 
-    std::fabs(deltaR) < windows->rMatchingWindowsDisk2S[disk][tracklet_->seedType()]; 
+   match = std::fabs(deltaRphi) < windows->rphiMatchingWindowsDisk2S[disk][tracklet_->seedTypeFull()] && 
+    std::fabs(deltaR) < windows->rMatchingWindowsDisk2S[disk][tracklet_->seedTypeFull()]; 
   }else{
-   match = std::fabs(deltaRphi) < windows->rphiMatchingWindowsDiskPS[disk][tracklet_->seedType()] && 
-    std::fabs(deltaR) < windows->rMatchingWindowsDiskPS[disk][tracklet_->seedType()]; 
+   match = std::fabs(deltaRphi) < windows->rphiMatchingWindowsDiskPS[disk][tracklet_->seedTypeFull()] && 
+    std::fabs(deltaR) < windows->rMatchingWindowsDiskPS[disk][tracklet_->seedTypeFull()]; 
   }
 
   if(match){stublist_.push_back(stub);}
