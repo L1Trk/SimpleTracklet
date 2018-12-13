@@ -20,6 +20,7 @@ namespace TMTT {
   {
   };
 
+  TrackletProjection(){};
   ~TrackletProjection(){};
 
   double rProjection(){return rProjection_;}

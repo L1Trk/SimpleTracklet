@@ -158,9 +158,6 @@ Settings::Settings(const edm::ParameterSet& iConfig) :
   minNumMatchPSLayers_    ( trackMatchDef_.getParameter<unsigned int>         ( "MinNumMatchPSLayers"    ) ),
   stubMatchStrict_        ( trackMatchDef_.getParameter<bool>                 ( "StubMatchStrict"        ) ),
 
-  //=== Tracklet Params
-  radLayers_               ( trackletSettings_.getParameter<vector<double>>   ( "RadLayers"          ) ),
-  
   //=== Track Fitting Settings
 
   trackFitters_           ( trackFitSettings_.getParameter<vector<std::string>> ( "TrackFitters"         ) ),
@@ -270,9 +267,9 @@ Settings::Settings(const edm::ParameterSet& iConfig) :
   bField_                 (0.),
 
   //simple-tracklet
-  tracklet_   (trackletSettings_.getParameter<bool>                                   ( "tracklet"              ) ),
-  layerRadii_ (trackletSettings_.getParameter<std::vector<double>>                    ( "layerRadii"            ) ),
-  diskZ_      (trackletSettings_.getParameter<std::vector<double>>                    ( "diskZ"                 ) )
+  tracklet_   (trackletSettings_.getParameter<bool>                                   ( "Tracklet"              ) ),
+  layerRadii_ (trackletSettings_.getParameter<std::vector<double>>                    ( "LayerRadii"            ) ),
+  diskZ_      (trackletSettings_.getParameter<std::vector<double>>                    ( "DiskZ"                 ) )
 
 {
   // If user didn't specify any PDG codes, use e,mu,pi,K,p, to avoid picking up unstable particles like Xi-.

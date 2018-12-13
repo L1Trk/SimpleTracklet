@@ -461,6 +461,12 @@ TMTrackProducer_params = cms.PSet(
     Other_skipTrackDigi = cms.bool( True ) 
   ),
 
+  TrackletSettings = cms.PSet(
+    Tracklet = cms.bool( False ),
+    LayerRadii = cms.vdouble( 25.1493, 37.468, 52.5977, 68.7737, 86.0591, 110.844 ),
+    DiskZ = cms.vdouble( 131.18, 155.0, 185.34, 221.619, 265.0 )
+    ),
+
   #===== Debug printout & plots
   Debug  = cms.uint32(1), #(0=none, 1=print #tracks/event, 2+ print more info)
   # When making helix parameter resolution plots, only use particles from the physics event (True)

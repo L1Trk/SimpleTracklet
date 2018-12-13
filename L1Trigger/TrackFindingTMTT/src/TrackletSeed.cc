@@ -13,7 +13,6 @@ namespace TMTT{
    const Settings* settings):
   settings_(settings)
  {
-
   seedTypeReduced_ =  TrackletSeed::whichSeedTypeReduced(outerStub, innerStub);
   
   seedTypeFull_ = TrackletSeed::whichSeedTypeFull(outerStub, innerStub);
@@ -22,7 +21,7 @@ namespace TMTT{
   
    
   this->setSectorParams(phiSec); 
-
+  
   this->seed(outerStub, innerStub, seedTypeReduced_);
 
   makeTracklet();
@@ -32,7 +31,6 @@ namespace TMTT{
 
 
  void TrackletSeed::makeTracklet(){
-
 
   switch( seedTypeReduced_ ){
    case 1:
@@ -101,14 +99,14 @@ namespace TMTT{
  //////////////////////////////////////////////////////////////////////////////////////
  void TrackletSeed::setSectorParams(unsigned int phiSec){
 
-  this->phiSec(phiSec);
+  phiSec_ = phiSec;
 
   double dphiSec=M_PI/settings_->numPhiSectors()+2*fmax(
-    fabs(asin(0.5*settings_->invPtToDphi()*settings_->radLayers().at(0)-asin(0.5*settings_->invPtToDphi()*settings_->chosenRofPhi()))),
-    fabs(asin(0.5*settings_->invPtToDphi()*settings_->radLayers().at(5)-asin(0.5*settings_->invPtToDphi()*settings_->chosenRofPhi()))));
+    fabs(asin(0.5*settings_->invPtToDphi()*settings_->layerRadii().at(0)-asin(0.5*settings_->invPtToDphi()*settings_->chosenRofPhi()))),
+    fabs(asin(0.5*settings_->invPtToDphi()*settings_->layerRadii().at(5)-asin(0.5*settings_->invPtToDphi()*settings_->chosenRofPhi()))));
 
-  secPhiMin(Utility::wrapRadian(phiSec*2*M_PI/settings_->numPhiSectors() - 0.5*dphiSec));
-  secPhiMax(Utility::wrapRadian(secPhiMin() + 2*M_PI/settings_->numPhiSectors() + 2*dphiSec));
+  secPhiMin_ = Utility::wrapRadian(phiSec*2*M_PI/settings_->numPhiSectors() - 0.5*dphiSec);
+  secPhiMax_ = Utility::wrapRadian(secPhiMin() + 2*M_PI/settings_->numPhiSectors() + 2*dphiSec);
  }
 
  //////////////////////////////////////////////////////////////////////////////////////
@@ -147,8 +145,7 @@ namespace TMTT{
   
   if(seedTypeReduced_ == 2){
 
-   innerStub->layerId() > 20 ? innerStub->layerId() - 20 :  innerStub->layerId() - 10;  
-   unsigned int disk = innerStub->layerId();
+   unsigned int disk = innerStub->layerId() > 20 ? innerStub->layerId() - 20 :  innerStub->layerId() - 10;  
 
    switch (disk) {
     case 1:

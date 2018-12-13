@@ -22,8 +22,12 @@ TMTrackProducer = cms.EDProducer('TMTrackProducer',
 #=== Parameters changed from their default values.
 #===================================================================================================
 
+#--- Uncomment for Simple Tracklet 
+TMTrackProducer.TrackletSettings.Tracklet = cms.bool( True )
+
+
 #--- Disable internal digitisation of SimpleLR fitter, as it was never retuned for nonants.
-TMTrackProducer.TrackFitSettings.DigitizeSLR = cms.bool(False)
+#TMTrackProducer.TrackFitSettings.DigitizeSLR = cms.bool(False),
 
 #===================================================================================================
 #=== All the following parameters already have identical values in TMTrackProducer_Defaults_cfi .
