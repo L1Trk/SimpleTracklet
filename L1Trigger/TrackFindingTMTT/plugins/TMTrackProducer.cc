@@ -15,7 +15,8 @@
 #include "L1Trigger/TrackFindingTMTT/interface/MiniHTstage.h"
 #include "L1Trigger/TrackFindingTMTT/interface/StubWindowSuggest.h"
 #include "L1Trigger/TrackFindingTMTT/interface/TrackletSeed.h"
-#include "L1Trigger/TrackFindingTMTT/interface/TrackletProjection.h"
+#include "L1Trigger/TrackFindingTMTT/interface/TrackletMatched.h"
+#include "L1Trigger/TrackFindingTMTT/interface/TrackletWindows.h"
 
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "FWCore/Framework/interface/Event.h"
@@ -66,13 +67,13 @@ namespace TMTT {
   // Create track fitting algorithm (& internal histograms if it uses them)
   for (const string& fitterName : trackFitters_) {
    fitterWorkerMap_[ fitterName ] = TrackFitGeneric::create(fitterName, settings_);
-   fitterWorkerMap_[ fitterName ]->bookHists(); 
+   fitterWorkerMap_[ fitterName ]->bookHists();
   }
 
-  //--- Define EDM output to be written to file (if required) 
+  //--- Define EDM output to be written to file (if required)
 
 #ifdef OutputHT_TTracks
-  // L1 tracks found by Hough Transform 
+  // L1 tracks found by Hough Transform
   produces< TTTrackCollection >( "TML1TracksHT" ).setBranchAlias("TML1TracksHT");
   // L1 tracks found by r-z track filter.
   if (runRZfilter_) produces< TTTrackCollection >( "TML1TracksRZ" ).setBranchAlias("TML1TracksRZ");
@@ -85,7 +86,7 @@ namespace TMTT {
  }
 
 
- void TMTrackProducer::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup) 
+ void TMTrackProducer::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
  {
   // Get the B-field and store its value in the Settings class.
 
@@ -99,7 +100,7 @@ namespace TMTT {
 
   // Initialize track fitting algorithm at start of run (especially with B-field dependent variables).
   for (const string& fitterName : trackFitters_) {
-   fitterWorkerMap_[ fitterName ]->initRun(); 
+   fitterWorkerMap_[ fitterName ]->initRun();
   }
 
   // Print info on tilted modules
@@ -126,7 +127,7 @@ namespace TMTT {
   InputData inputData(iEvent, iSetup, settings_, tpInputTag, stubInputTag, stubTruthInputTag, clusterTruthInputTag, genJetInputTag_);
 
   const vector<TP>&          vTPs   = inputData.getTPs();
-  const vector<const Stub*>& vStubs = inputData.getStubs(); 
+  const vector<const Stub*>& vStubs = inputData.getStubs();
 
   // Creates matrix of Sector objects, which decide which stubs are in which (eta,phi) sector
   matrix<Sector>  mSectors(settings_->numPhiSectors(), settings_->numEtaRegions());
@@ -147,7 +148,7 @@ namespace TMTT {
   // Storage for EDM L1 track collection to be produced from fitted tracks (one for each fit algorithm being used).
   // auto_ptr cant be stored in std containers, so use C one, together with map noting which element corresponds to which algorithm.
   const unsigned int nFitAlgs = trackFitters_.size();
-  std::unique_ptr<TTTrackCollection> allFitTTTracksForOutput[nFitAlgs]; 
+  std::unique_ptr<TTTrackCollection> allFitTTTracksForOutput[nFitAlgs];
   map<string, unsigned int> locationInsideArray;
   unsigned int ialg = 0;
   for (const string& fitterName : trackFitters_) {
@@ -166,7 +167,7 @@ namespace TMTT {
     HTrphi& htRphi = mHtRphis(iPhiSec, iEtaReg);
 
     // Initialize constants for this sector.
-    sector.init(settings_, iPhiSec, iEtaReg); 
+    sector.init(settings_, iPhiSec, iEtaReg);
     htRphi.init(settings_, iPhiSec, iEtaReg, sector.etaMin(), sector.etaMax(), sector.phiCentre());
 
     // Check sector is enabled (always true, except if user disabled some for special studies).
@@ -217,7 +218,9 @@ namespace TMTT {
   //Tracklet-tmtt option
   if(settings_->tracklet()){
 
-   std::vector<const TrackletSeed*> trackletSeeds;
+   std::vector<TrackletSeed*> trackletSeeds;
+   std::vector<const L1track3D*> trackletsMatched3D;
+   TrackletWindows *trackletWindows;;
 
    for (unsigned int iPhiSec = 0; iPhiSec < settings_->numPhiSectors(); iPhiSec++) {
 
@@ -253,7 +256,7 @@ namespace TMTT {
         for (const Stub* outerStub: barrelStubs.at(outerSeedLayer)) {
 
 
-         const TrackletSeed trackletSeed(outerStub, innerStub, iPhiSec, settings_);
+         TrackletSeed trackletSeed(outerStub, innerStub, iPhiSec, settings_);
 
          trackletSeeds.push_back(&trackletSeed);
         }
@@ -273,7 +276,7 @@ namespace TMTT {
         for (const Stub* outerStub: diskStubs.at(outerSeedLayer)) {
 
 
-         const TrackletSeed trackletSeed(outerStub, innerStub, iPhiSec, settings_);
+         TrackletSeed trackletSeed(outerStub, innerStub, iPhiSec, settings_);
 
          trackletSeeds.push_back(&trackletSeed);
         }
@@ -288,7 +291,7 @@ namespace TMTT {
       for (const Stub* innerStub: barrelStubs.at(innerSeedLayer)) {
        for (const Stub* outerStub: diskStubs.at(outerSeedLayer)) {
 
-        const TrackletSeed trackletSeed(outerStub, innerStub, iPhiSec, settings_);
+        TrackletSeed trackletSeed(outerStub, innerStub, iPhiSec, settings_);
 
         trackletSeeds.push_back(&trackletSeed);
        }
@@ -296,186 +299,206 @@ namespace TMTT {
      }
     }
    }
-   std::cout << "N. Tracklet Seeds " << trackletSeeds.size() << std::endl; 
+   std::cout << "N. Tracklet Seeds " << trackletSeeds.size() << std::endl;
 
-   for (const TrackletSeed* seed: trackletSeeds){
+   for (TrackletSeed* seed: trackletSeeds){
+
+    Sector& sector = mSectors(seed->phiSec(), 0);//no eta regions in tracklet-tmtt
+    sector.init(settings_, seed->phiSec(), 0); //no eta regions in tracklet-tmtt
+
+    TrackletMatched trackletMatched(seed, settings_);
+
+    for (const Stub* stub: vStubs) {
+     if(sector.inside (stub) ){
+
+      if(stub->barrel()){
+       trackletMatched.MatchLayerStub(stub, trackletWindows);
+      }else{
+       trackletMatched.MatchDiskStub(stub, trackletWindows);
+      }
+     }
+
+    }
+    if(trackletMatched.stublist().size() > 1 ){
+     trackletsMatched3D.push_back(&trackletMatched.return3Dtrack());
+    }
 
    }
 
-  } 
+   //=== Make 3D tracks, optionally running r-z track filters (such as Seed Filter) & duplicate track removal.
 
-  //=== Make 3D tracks, optionally running r-z track filters (such as Seed Filter) & duplicate track removal. 
+   for (unsigned int iPhiSec = 0; iPhiSec < settings_->numPhiSectors(); iPhiSec++) {
+    for (unsigned int iEtaReg = 0; iEtaReg < settings_->numEtaRegions(); iEtaReg++) {
 
-  for (unsigned int iPhiSec = 0; iPhiSec < settings_->numPhiSectors(); iPhiSec++) {
-   for (unsigned int iEtaReg = 0; iEtaReg < settings_->numEtaRegions(); iEtaReg++) {
+     const Sector& sector = mSectors(iPhiSec, iEtaReg);
 
-    const Sector& sector = mSectors(iPhiSec, iEtaReg);
+     // Get tracks found by r-phi HT.
+     const HTrphi& htRphi = mHtRphis(iPhiSec, iEtaReg);
+     const vector<L1track2D>& vecTracksRphi = htRphi.trackCands2D();
 
-    // Get tracks found by r-phi HT.
-    const HTrphi& htRphi = mHtRphis(iPhiSec, iEtaReg);
-    const vector<L1track2D>& vecTracksRphi = htRphi.trackCands2D();
 
-    Get3Dtracks& get3Dtrk = mGet3Dtrks(iPhiSec, iEtaReg);
-    // Initialize utility for making 3D tracks from 2D ones.
-    get3Dtrk.init(settings_, iPhiSec, iEtaReg, sector.etaMin(), sector.etaMax(), sector.phiCentre());
+     Get3Dtracks& get3Dtrk = mGet3Dtrks(iPhiSec, iEtaReg);
+     // Initialize utility for making 3D tracks from 2D ones.
+     get3Dtrk.init(settings_, iPhiSec, iEtaReg, sector.etaMin(), sector.etaMax(), sector.phiCentre());
 
-    // Convert 2D tracks found by HT to 3D tracks (optionally by running r-z filters & duplicate track removal)
-    get3Dtrk.run(vecTracksRphi);
+     // Convert 2D tracks found by HT to 3D tracks (optionally by running r-z filters & duplicate track removal)
+     get3Dtrk.run(vecTracksRphi);
 
 #ifdef OutputHT_TTracks
-    // Convert these tracks to EDM format for output (used for collaborative work outside TMTT group).
-    // Do this for tracks output by HT & optionally also for those output by r-z track filter.
-    const vector<L1track3D>& vecTrk3D_ht = get3Dtrk.trackCands3D(false);
-    for (const L1track3D& trk : vecTrk3D_ht) {
-     TTTrack< Ref_Phase2TrackerDigi_ > htTTTrack = converter.makeTTTrack(trk, iPhiSec, iEtaReg);
-     htTTTracksForOutput->push_back( htTTTrack );
-    }
-
-    if (runRZfilter_) {
-     const vector<L1track3D>& vecTrk3D_rz = get3Dtrk.trackCands3D(true);
-     for (const L1track3D& trk : vecTrk3D_rz) {
-      TTTrack< Ref_Phase2TrackerDigi_ > rzTTTrack = converter.makeTTTrack(trk, iPhiSec, iEtaReg);
-      rzTTTracksForOutput->push_back( rzTTTrack );
+     // Convert these tracks to EDM format for output (used for collaborative work outside TMTT group).
+     // Do this for tracks output by HT & optionally also for those output by r-z track filter.
+     const vector<L1track3D>& vecTrk3D_ht = get3Dtrk.trackCands3D(false);
+     for (const L1track3D& trk : vecTrk3D_ht) {
+      TTTrack< Ref_Phase2TrackerDigi_ > htTTTrack = converter.makeTTTrack(trk, iPhiSec, iEtaReg);
+      htTTTracksForOutput->push_back( htTTTrack );
      }
-    }
+
+     if (runRZfilter_) {
+      const vector<L1track3D>& vecTrk3D_rz = get3Dtrk.trackCands3D(true);
+      for (const L1track3D& trk : vecTrk3D_rz) {
+       TTTrack< Ref_Phase2TrackerDigi_ > rzTTTrack = converter.makeTTTrack(trk, iPhiSec, iEtaReg);
+       rzTTTracksForOutput->push_back( rzTTTrack );
+      }
+     }
 #endif
+    }
    }
-  }
 
-  // Initialize the duplicate track removal algorithm that can optionally be run after the track fit.
-  KillDupFitTrks killDupFitTrks;
-  killDupFitTrks.init(settings_, settings_->dupTrkAlgFit());
+   // Initialize the duplicate track removal algorithm that can optionally be run after the track fit.
+   KillDupFitTrks killDupFitTrks;
+   killDupFitTrks.init(settings_, settings_->dupTrkAlgFit());
 
-  //=== Do a helix fit to all the track candidates.
+   //=== Do a helix fit to all the track candidates.
 
-  map<string, vector<L1fittedTrack>> fittedTracks;
-  // Initialize with empty vector in case no fitted tracks found.
-  for (const string& fitterName : trackFitters_) { // Loop over fit algos.
-   fittedTracks[fitterName] = vector<L1fittedTrack>(); 
-  }
+   map<string, vector<L1fittedTrack>> fittedTracks;
+   // Initialize with empty vector in case no fitted tracks found.
+   for (const string& fitterName : trackFitters_) { // Loop over fit algos.
+    fittedTracks[fitterName] = vector<L1fittedTrack>();
+   }
 
-  for (unsigned int iPhiSec = 0; iPhiSec < settings_->numPhiSectors(); iPhiSec++) {
-   for (unsigned int iEtaReg = 0; iEtaReg < settings_->numEtaRegions(); iEtaReg++) {
+   for (unsigned int iPhiSec = 0; iPhiSec < settings_->numPhiSectors(); iPhiSec++) {
+    for (unsigned int iEtaReg = 0; iEtaReg < settings_->numEtaRegions(); iEtaReg++) {
 
-    const Get3Dtracks& get3Dtrk = mGet3Dtrks(iPhiSec, iEtaReg);
+     const Get3Dtracks& get3Dtrk = mGet3Dtrks(iPhiSec, iEtaReg);
 
-    // Loop over all the fitting algorithms we are trying.
-    for (const string& fitterName : trackFitters_) {
+     // Loop over all the fitting algorithms we are trying.
+     for (const string& fitterName : trackFitters_) {
 
-     // Does this fitter require r-z track filter to be run before it?
-     bool useRZfilt = (std::count(useRZfilter_.begin(), useRZfilter_.end(), fitterName) > 0);
+      // Does this fitter require r-z track filter to be run before it?
+      bool useRZfilt = (std::count(useRZfilter_.begin(), useRZfilter_.end(), fitterName) > 0);
 
-     // Get 3D track candidates found by Hough transform (plus optional r-z filters/duplicate removal) in this sector.
-     const vector<L1track3D>& vecTrk3D = get3Dtrk.trackCands3D(useRZfilt);
+      // Get 3D track candidates found by Hough transform (plus optional r-z filters/duplicate removal) in this sector.
+      const vector<L1track3D>& vecTrk3D = settings_->tracklet() ? trackletsMatched3D : get3Dtrk.trackCands3D(useRZfilt);
 
-     // Fit all tracks in this sector
-     vector<L1fittedTrack> fittedTracksInSec;
-     for (const L1track3D& trk : vecTrk3D) {
+      // Fit all tracks in this sector
+      vector<L1fittedTrack> fittedTracksInSec;
+      for (const L1track3D& trk : vecTrk3D) {
 
-      // IRT
-      //bool OK = (trk.getMatchedTP() != nullptr && trk.getMatchedTP()->pt() > 50 && fabs(trk.getMatchedTP()->eta()) > 1.4 && fabs(trk.getMatchedTP()->eta()) < 1.8);
-      //if (trk.getNumStubs() != trk.getNumLayers()) OK = false;
-      //if (not OK) continue;
+       // IRT
+       //bool OK = (trk.getMatchedTP() != nullptr && trk.getMatchedTP()->pt() > 50 && fabs(trk.getMatchedTP()->eta()) > 1.4 && fabs(trk.getMatchedTP()->eta()) < 1.8);
+       //if (trk.getNumStubs() != trk.getNumLayers()) OK = false;
+       //if (not OK) continue;
 
-      // Ensure stubs assigned to this track is digitized with respect to the phi sector the track is in.
-      if (settings_->enableDigitize()) {
-       const vector<const Stub*>& stubsOnTrk = trk.getStubs();
-       for (const Stub* s : stubsOnTrk) {
-        (const_cast<Stub*>(s))->digitizeForHTinput(iPhiSec);
-        // Also digitize stub in way this specific track fitter uses it.
-        (const_cast<Stub*>(s))->digitizeForSForTFinput(fitterName);          
+       // Ensure stubs assigned to this track is digitized with respect to the phi sector the track is in.
+       if (settings_->enableDigitize()) {
+        const vector<const Stub*>& stubsOnTrk = trk.getStubs();
+        for (const Stub* s : stubsOnTrk) {
+         (const_cast<Stub*>(s))->digitizeForHTinput(iPhiSec);
+         // Also digitize stub in way this specific track fitter uses it.
+         (const_cast<Stub*>(s))->digitizeForSForTFinput(fitterName);
+        }
+       }
+
+       L1fittedTrack fitTrack = fitterWorkerMap_[fitterName]->fit(trk);
+
+       if (fitTrack.accepted()) { // If fitter accepted track, then store it.
+        // Optionally digitize fitted track, degrading slightly resolution.
+        if (settings_->enableDigitize()) fitTrack.digitizeTrack(fitterName);
+        // Store fitted tracks, such that there is one fittedTracks corresponding to each HT tracks.
+        // N.B. Tracks rejected by the fit are also stored, but marked.
+        fittedTracksInSec.push_back(fitTrack);
        }
       }
 
-      L1fittedTrack fitTrack = fitterWorkerMap_[fitterName]->fit(trk);
+      // Run duplicate track removal on the fitted tracks if requested.
+      const vector<L1fittedTrack> filtFittedTracksInSec = killDupFitTrks.filter( fittedTracksInSec );
 
-      if (fitTrack.accepted()) { // If fitter accepted track, then store it.
-       // Optionally digitize fitted track, degrading slightly resolution.
-       if (settings_->enableDigitize()) fitTrack.digitizeTrack(fitterName);
-       // Store fitted tracks, such that there is one fittedTracks corresponding to each HT tracks.
-       // N.B. Tracks rejected by the fit are also stored, but marked.
-       fittedTracksInSec.push_back(fitTrack);
+      // Store fitted tracks from entire tracker.
+      for (const L1fittedTrack& fitTrk : filtFittedTracksInSec) {
+       fittedTracks[fitterName].push_back(fitTrk);
+       // Convert these fitted tracks to EDM format for output (used for collaborative work outside TMTT group).
+       TTTrack< Ref_Phase2TrackerDigi_ > fitTTTrack = converter.makeTTTrack(fitTrk, iPhiSec, iEtaReg);
+       allFitTTTracksForOutput[locationInsideArray[fitterName]]->push_back(fitTTTrack);
       }
      }
+    }
+   }
 
-     // Run duplicate track removal on the fitted tracks if requested.
-     const vector<L1fittedTrack> filtFittedTracksInSec = killDupFitTrks.filter( fittedTracksInSec );
-
-     // Store fitted tracks from entire tracker.
-     for (const L1fittedTrack& fitTrk : filtFittedTracksInSec) {
-      fittedTracks[fitterName].push_back(fitTrk);
-      // Convert these fitted tracks to EDM format for output (used for collaborative work outside TMTT group).
-      TTTrack< Ref_Phase2TrackerDigi_ > fitTTTrack = converter.makeTTTrack(fitTrk, iPhiSec, iEtaReg);
-      allFitTTTracksForOutput[locationInsideArray[fitterName]]->push_back(fitTTTrack);
+   // Debug printout
+   unsigned int static nEvents = 0;
+   nEvents++;
+   if (settings_->debug() >= 1 && nEvents <= 1000) {
+    cout<<"INPUT #TPs = "<<vTPs.size()<<" #STUBs = "<<vStubs.size()<<endl;
+    unsigned int numHTtracks = 0;
+    for (unsigned int iPhiSec = 0; iPhiSec < settings_->numPhiSectors(); iPhiSec++) {
+     for (unsigned int iEtaReg = 0; iEtaReg < settings_->numEtaRegions(); iEtaReg++) {
+      const Get3Dtracks& get3Dtrk = mGet3Dtrks(iPhiSec, iEtaReg);
+      numHTtracks += get3Dtrk.trackCands3D(false).size();
      }
     }
-   }
-  }
-
-  // Debug printout
-  unsigned int static nEvents = 0;
-  nEvents++;
-  if (settings_->debug() >= 1 && nEvents <= 1000) {
-   cout<<"INPUT #TPs = "<<vTPs.size()<<" #STUBs = "<<vStubs.size()<<endl;
-   unsigned int numHTtracks = 0;
-   for (unsigned int iPhiSec = 0; iPhiSec < settings_->numPhiSectors(); iPhiSec++) {
-    for (unsigned int iEtaReg = 0; iEtaReg < settings_->numEtaRegions(); iEtaReg++) {
-     const Get3Dtracks& get3Dtrk = mGet3Dtrks(iPhiSec, iEtaReg);
-     numHTtracks += get3Dtrk.trackCands3D(false).size();
+    cout<<"Number of tracks after HT = "<<numHTtracks<<endl;
+    for (const auto& p : fittedTracks) {
+     const string& fitName = p.first;
+     const vector<L1fittedTrack>& fittedTracks = p.second;
+     cout<<"Number of tracks after "<<fitName<<" track helix fit = "<<fittedTracks.size()<<endl;
     }
    }
-   cout<<"Number of tracks after HT = "<<numHTtracks<<endl;
-   for (const auto& p : fittedTracks) {
-    const string& fitName = p.first;
-    const vector<L1fittedTrack>& fittedTracks = p.second;
-    cout<<"Number of tracks after "<<fitName<<" track helix fit = "<<fittedTracks.size()<<endl;
+
+
+   // Allow histogramming to plot undigitized variables.
+   for (const Stub* stub: vStubs) {
+    if (settings_->enableDigitize()) (const_cast<Stub*>(stub))->setDigitizeWarningsOn(false);
+   }
+
+   // Fill histograms to monitor input data & tracking performance.
+   hists_->fill(inputData, mSectors, mHtRphis, mGet3Dtrks, fittedTracks);
+
+   //=== Store output EDM track and hardware stub collections.
+#ifdef OutputHT_TTracks
+   iEvent.put( std::move( htTTTracksForOutput ),  "TML1TracksHT");
+   if (runRZfilter_) iEvent.put( std::move( rzTTTracksForOutput ),  "TML1TracksRZ");
+#endif
+   for (const string& fitterName : trackFitters_) {
+    string edmName = string("TML1Tracks") + fitterName;
+    iEvent.put(std::move( allFitTTTracksForOutput[locationInsideArray[fitterName]] ), edmName);
    }
   }
 
 
-  // Allow histogramming to plot undigitized variables.
-  for (const Stub* stub: vStubs) {
-   if (settings_->enableDigitize()) (const_cast<Stub*>(stub))->setDigitizeWarningsOn(false);
+  void TMTrackProducer::endJob()
+  {
+   // Print stub window sizes that TMTT recommends CMS uses in FE chips.
+   if (settings_->printStubWindows()) StubWindowSuggest::printResults();
+
+   // Optional debug printout from track fitters at end of job.
+   for (const string& fitterName : trackFitters_) {
+    fitterWorkerMap_[ fitterName ]->endJob();
+   }
+
+   // Print job summary
+   hists_->trackerGeometryAnalysis(trackerGeometryInfo_);
+   hists_->endJobAnalysis();
+
+   for (const string& fitterName : trackFitters_) {
+    //cout << "# of duplicated stubs = " << fitterWorkerMap_[fitterName]->nDupStubs() << endl;
+    delete fitterWorkerMap_[ string(fitterName) ];
+   }
+
+   cout<<endl<<"Number of (eta,phi) sectors used = (" << settings_->numEtaRegions() << "," << settings_->numPhiSectors()<<")"<<endl;
+
   }
 
-  // Fill histograms to monitor input data & tracking performance.
-  hists_->fill(inputData, mSectors, mHtRphis, mGet3Dtrks, fittedTracks);
-
-  //=== Store output EDM track and hardware stub collections.
-#ifdef OutputHT_TTracks
-  iEvent.put( std::move( htTTTracksForOutput ),  "TML1TracksHT");
-  if (runRZfilter_) iEvent.put( std::move( rzTTTracksForOutput ),  "TML1TracksRZ");
-#endif
-  for (const string& fitterName : trackFitters_) {
-   string edmName = string("TML1Tracks") + fitterName;
-   iEvent.put(std::move( allFitTTTracksForOutput[locationInsideArray[fitterName]] ), edmName);
-  }
- }
-
-
- void TMTrackProducer::endJob() 
- {
-  // Print stub window sizes that TMTT recommends CMS uses in FE chips.
-  if (settings_->printStubWindows()) StubWindowSuggest::printResults();  
-
-  // Optional debug printout from track fitters at end of job.
-  for (const string& fitterName : trackFitters_) {
-   fitterWorkerMap_[ fitterName ]->endJob(); 
-  }
-
-  // Print job summary
-  hists_->trackerGeometryAnalysis(trackerGeometryInfo_);
-  hists_->endJobAnalysis();
-
-  for (const string& fitterName : trackFitters_) {
-   //cout << "# of duplicated stubs = " << fitterWorkerMap_[fitterName]->nDupStubs() << endl;
-   delete fitterWorkerMap_[ string(fitterName) ];
-  }
-
-  cout<<endl<<"Number of (eta,phi) sectors used = (" << settings_->numEtaRegions() << "," << settings_->numPhiSectors()<<")"<<endl; 
+  DEFINE_FWK_MODULE(TMTrackProducer);
 
  }
 
- DEFINE_FWK_MODULE(TMTrackProducer);
-
-}

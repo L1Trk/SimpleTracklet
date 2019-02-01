@@ -28,7 +28,7 @@ namespace TMTT {
    TrackletProjection projectBarrel(unsigned int rProjection);
    TrackletProjection projectEndcap(unsigned int rProjection);
 
-   unsigned int phiSec();
+   const unsigned int phiSec();
    unsigned int seedTypeReduced();
    unsigned int seedTypeFull();
    unsigned int etaSec();

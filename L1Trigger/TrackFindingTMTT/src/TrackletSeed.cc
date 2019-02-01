@@ -81,7 +81,7 @@ namespace TMTT{
  void TrackletSeed::etaSec(unsigned int x){etaSec_=x;}
  void TrackletSeed::secPhiMax(double x){secPhiMax_=x;}
  void TrackletSeed::secPhiMin(double x){secPhiMin_=x;}
- unsigned int TrackletSeed::phiSec(){return phiSec_;}
+ const unsigned int TrackletSeed::phiSec(){return phiSec_;}
  unsigned int TrackletSeed::seedTypeReduced(){return seedTypeReduced_;}
  unsigned int TrackletSeed::seedTypeFull(){return seedTypeFull_;}
  unsigned int TrackletSeed::etaSec(){return etaSec_;}

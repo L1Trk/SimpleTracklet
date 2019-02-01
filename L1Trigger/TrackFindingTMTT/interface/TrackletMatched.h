@@ -21,14 +21,16 @@ class TrackletMatched{
   TrackletMatched( TrackletSeed* tracklet, Settings* settings );
   ~TrackletMatched(){};
 
-  void MatchLayerStub( Stub* stub, TrackletWindows* windows );
-  void MatchDiskStub(  Stub* stub, TrackletWindows* windows );
+  void MatchLayerStub( const Stub* stub, TrackletWindows* windows );
+  void MatchDiskStub(  const Stub* stub, TrackletWindows* windows );
+
+  std::vector < const Stub* > stublist();
 
  private:
   
   TrackletSeed* tracklet_;
   Settings* settings_;
-  std::vector < Stub* > stublist_; 
+  std::vector < const Stub* > stublist_; 
 };
 
 }
