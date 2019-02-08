@@ -215,11 +215,11 @@ namespace TMTT {
    miniHTstage.exec( mHtRphis );
   }
 
+  std::vector<L1track3D> trackletsMatched3D;
   //Tracklet-tmtt option
   if(settings_->tracklet()){
 
    std::vector<TrackletSeed*> trackletSeeds;
-   std::vector<L1track3D*> trackletsMatched3D;
    TrackletWindows *trackletWindows;;
 
    for (unsigned int iPhiSec = 0; iPhiSec < settings_->numPhiSectors(); iPhiSec++) {
@@ -321,11 +321,12 @@ namespace TMTT {
     }
     if(trackletMatched.stublist().size() > 1 ){
     L1track3D track = trackletMatched.returntrack3D();
-     trackletsMatched3D.push_back(&track);
+     trackletsMatched3D.push_back(track);
     }
 
    }
-
+  }
+ 
    //=== Make 3D tracks, optionally running r-z track filters (such as Seed Filter) & duplicate track removal.
 
    for (unsigned int iPhiSec = 0; iPhiSec < settings_->numPhiSectors(); iPhiSec++) {
@@ -388,14 +389,13 @@ namespace TMTT {
       // Does this fitter require r-z track filter to be run before it?
       bool useRZfilt = (std::count(useRZfilter_.begin(), useRZfilter_.end(), fitterName) > 0);
       
-      const std::vector<L1track3D*> finalTrackletsMatched3D = trackletsMatched3D;
-      
+      const vector<L1track3D> trackletsMatchedFinal = trackletsMatched3D;
       // Get 3D track candidates found by Hough transform (plus optional r-z filters/duplicate removal) in this sector.
-      const vector<L1track3D*> vecTrk3D = settings_->tracklet() ? finalTrackletsMatched3D : get3Dtrk.trackCands3D(useRZfilt)&;
+      const vector<L1track3D> vecTrk3D = settings_->tracklet() ? trackletsMatched3D : get3Dtrk.trackCands3D(useRZfilt);
 
       // Fit all tracks in this sector
       vector<L1fittedTrack> fittedTracksInSec;
-      for (const L1track3D& trk : vecTrk3D&) {
+      for (const L1track3D& trk : vecTrk3D) {
 
        // IRT
        //bool OK = (trk.getMatchedTP() != nullptr && trk.getMatchedTP()->pt() > 50 && fabs(trk.getMatchedTP()->eta()) > 1.4 && fabs(trk.getMatchedTP()->eta()) < 1.8);
