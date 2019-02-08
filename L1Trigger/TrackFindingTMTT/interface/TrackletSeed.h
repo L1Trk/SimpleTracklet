@@ -2,6 +2,7 @@
 #define __TRACKLETSEED_H__
 
 #include <vector>
+#include "L1Trigger/TrackFindingTMTT/interface/TrackletProjection.h"
 
 using namespace std;
 
