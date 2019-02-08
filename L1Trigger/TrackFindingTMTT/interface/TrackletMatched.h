@@ -5,6 +5,7 @@
 #include "L1Trigger/TrackFindingTMTT/interface/Stub.h"
 #include "L1Trigger/TrackFindingTMTT/interface/TrackletWindows.h"
 #include "L1Trigger/TrackFindingTMTT/interface/TrackletSeed.h"
+#include "L1Trigger/TrackFindingTMTT/interface/L1track3D.h"
 
 
 using namespace std;
@@ -25,8 +26,9 @@ class TrackletMatched{
   void MatchDiskStub(  const Stub* stub, TrackletWindows* windows );
 
   std::vector < const Stub* > stublist();
-
- private:
+  L1track3D returntrack3D();
+ 
+  private:
   
   TrackletSeed* tracklet_;
   Settings* settings_;

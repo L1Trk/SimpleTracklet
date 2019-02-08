@@ -83,12 +83,16 @@ namespace TMTT{
  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- L1track3D TrackletMatched::returnTrack3D(){
-   double rInv_, phi0_, z0_, tanLambda_; //Track params
-  L1track3D track = L1track3D(settings_, stublist_, 0, pair<itracklet_->rInv_, tracklet_->phi0_>, pair<tracklet_->z0_, tracklet_->tanLambda>, phiSec_, 0, 0, 0);
+ L1track3D TrackletMatched::returntrack3D(){
+  L1track3D track = L1track3D(settings_, stublist_, pair<unsigned int, unsigned int>(0, 0), 
+    pair<float,float>(tracklet_->rInv(), tracklet_->phi0()), pair<float, float>(tracklet_->z0(), 
+     tracklet_->tanLambda()), tracklet_->phiSec(), 0, 0, false);
  return track;
  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- 
- }
-
+ /*
+   L1track3D(const Settings* settings, const vector<const Stub*>& stubs,
+                 pair<unsigned int, unsigned int> cellLocationHT, pair<float, float> helixRphi, pair<float, float> helixRz,
+                       unsigned int iPhiSec, unsigned int iEtaReg, unsigned int optoLinkID, bool mergedHTcell) :}
+*/
+}
 };
