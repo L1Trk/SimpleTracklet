@@ -219,8 +219,8 @@ namespace TMTT {
   //Tracklet-tmtt option
   if(settings_->tracklet()){
 
-   std::vector<TrackletSeed*> trackletSeeds;
-   TrackletWindows *trackletWindows;;
+   std::vector<TrackletSeed> trackletSeeds;
+   TrackletWindows *trackletWindows = new TrackletWindows();
 
    for (unsigned int iPhiSec = 0; iPhiSec < settings_->numPhiSectors(); iPhiSec++) {
 
@@ -231,12 +231,11 @@ namespace TMTT {
 
     for (const Stub* stub: vStubs) {
 
-     if(sector.inside( stub )){
+     if(sector.insidePhi( stub )){
 
       if(stub->barrel()){
        barrelStubs.at(stub->layerId() - 1).push_back(stub);
       }
-
       if(!stub->barrel()){
        unsigned int disk = stub->layerId() > 20 ? stub->layerId() - 21 : stub->layerId() - 11;
        diskStubs.at(disk).push_back(stub);
@@ -257,8 +256,7 @@ namespace TMTT {
 
 
          TrackletSeed trackletSeed(outerStub, innerStub, iPhiSec, settings_);
-
-         trackletSeeds.push_back(&trackletSeed);
+         trackletSeeds.push_back(trackletSeed);
         }
        }
       }
@@ -277,8 +275,7 @@ namespace TMTT {
 
 
          TrackletSeed trackletSeed(outerStub, innerStub, iPhiSec, settings_);
-
-         trackletSeeds.push_back(&trackletSeed);
+         trackletSeeds.push_back(trackletSeed);
         }
        }
       }
@@ -292,8 +289,7 @@ namespace TMTT {
        for (const Stub* outerStub: diskStubs.at(outerSeedLayer)) {
 
         TrackletSeed trackletSeed(outerStub, innerStub, iPhiSec, settings_);
-
-        trackletSeeds.push_back(&trackletSeed);
+        trackletSeeds.push_back(trackletSeed);
        }
       }
      }
@@ -301,23 +297,23 @@ namespace TMTT {
    }
    std::cout << "N. Tracklet Seeds " << trackletSeeds.size() << std::endl;
 
-   for (TrackletSeed* seed: trackletSeeds){
+   for (TrackletSeed seed: trackletSeeds){
 
-    Sector& sector = mSectors(seed->phiSec(), 0);//no eta regions in tracklet-tmtt
-    sector.init(settings_, seed->phiSec(), 0); //no eta regions in tracklet-tmtt
+    Sector& sector = mSectors(seed.phiSec(), 0);//no eta regions in tracklet-tmtt
+    sector.init(settings_, seed.phiSec(), 0); //no eta regions in tracklet-tmtt
 
-    TrackletMatched trackletMatched(seed, settings_);
+    TrackletMatched trackletMatched(&seed, settings_);
 
     for (const Stub* stub: vStubs) {
-     if(sector.inside (stub) ){
+     if(sector.insidePhi(stub) ){
 
+      if ( stub->layerId() == seed.innerStub()->layerId() || stub->layerId() == seed.outerStub()->layerId() ) continue;
       if(stub->barrel()){
        trackletMatched.MatchLayerStub(stub, trackletWindows);
       }else{
        trackletMatched.MatchDiskStub(stub, trackletWindows);
       }
      }
-
     }
     if(trackletMatched.stublist().size() > 1 ){
     L1track3D track = trackletMatched.returntrack3D();
