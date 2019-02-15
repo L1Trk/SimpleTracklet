@@ -42,6 +42,9 @@ namespace TMTT {
    double tanLambda();
     
 
+   const Stub* innerStub();
+   const Stub* outerStub();
+
    void setRInv(double rInv);
    void setPhi0(double phi0);
    void setZ0(double z0);
@@ -52,8 +55,8 @@ namespace TMTT {
  
   private:
 
-   Stub* innerStub_;
-   Stub* outerStub_;
+   const Stub* innerStub_;
+   const Stub* outerStub_;
    unsigned int phiSec_, etaSec_, seedTypeFull_, seedTypeReduced_;
    double rInv_, phi0_, z0_, tanLambda_; //Track params
    double secPhiMin_, secPhiMax_;

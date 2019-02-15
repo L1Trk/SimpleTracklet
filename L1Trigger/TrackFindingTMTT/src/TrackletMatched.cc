@@ -23,17 +23,17 @@ namespace TMTT{
 
   layer-=1;
 
+
+  double stubPhiInSector = stub->phi() - tracklet_->secPhiMin() + asin(0.5*stub->r()*settings_->invPtToDphi());
+
   double deltaR = stub->r() - tracklet_->barrelProjections().at(layer).rProjection();
-
-  double deltaPhi = stub->phi() - tracklet_->barrelProjections().at(layer).phiProjection() - deltaR*tracklet_->barrelProjections().at(layer).phiDerivitive();
-
+  double deltaPhi = stubPhiInSector - tracklet_->barrelProjections().at(layer).phiProjection() - deltaR*tracklet_->barrelProjections().at(layer).phiDerivitive();
   double deltaZ = stub->z() - tracklet_->barrelProjections().at(layer).zProjection() - deltaR*tracklet_->barrelProjections().at(layer).zDerivitive();
 
   double layerRadii = settings_->layerRadii().at(layer); 
-
   //Execute stub matching conditions here, seedType must be extended format 0-7
   bool match = ( std::fabs(deltaPhi) < windows->phiMatchingWindowsBarrel[layer][tracklet_->seedTypeFull()] / layerRadii && 
-    std::fabs(deltaZ) < windows->zMatchingWindowsBarrel[layer][tracklet_->seedTypeFull()] / layerRadii );
+    std::fabs(deltaZ) < windows->zMatchingWindowsBarrel[layer][tracklet_->seedTypeFull()] );// / layerRadii );
 
   if(match){stublist_.push_back(stub);}
  }

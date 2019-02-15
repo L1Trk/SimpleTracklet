@@ -3,6 +3,7 @@
 #include "L1Trigger/TrackFindingTMTT/interface/Utility.h"
 #include "L1Trigger/TrackFindingTMTT/interface/StubCluster.h"
 #include "L1Trigger/TrackFindingTMTT/interface/TrackletProjection.h"
+#include <L1Trigger/TrackFindingTMTT/interface/Sector.h>
 
 
 using namespace std;
@@ -11,6 +12,8 @@ namespace TMTT{
  //////////////////////////////////////////////////////////////////////////////////////
  TrackletSeed::TrackletSeed(const Stub* outerStub, const Stub* innerStub, unsigned int phiSec, 
    const Settings* settings):
+  innerStub_(innerStub),
+  outerStub_(outerStub),
   settings_(settings)
  {
   seedTypeReduced_ =  TrackletSeed::whichSeedTypeReduced(outerStub, innerStub);
@@ -35,7 +38,8 @@ namespace TMTT{
   switch( seedTypeReduced_ ){
    case 1:
 
-    for( int layer = 0; layer < 4; ++layer ){
+    // for( int layer = 0; layer < 4; ++layer ){
+    for( int layer = 0; layer < 6; ++layer ){
      barrelProjections_.push_back(this->projectBarrel(layer));
     }
 
@@ -47,7 +51,7 @@ namespace TMTT{
 
    case 2:
 
-    for( int layer = 0; layer < 4; ++layer ){
+    for( int layer = 0; layer < 6; ++layer ){
      barrelProjections_.push_back(this->projectBarrel(layer));
     }
 
@@ -59,7 +63,7 @@ namespace TMTT{
 
    case 3:
 
-    for( int layer = 0; layer < 4; ++layer ){
+    for( int layer = 0; layer < 6; ++layer ){
      barrelProjections_.push_back(this->projectBarrel(layer));
     }
 
@@ -88,6 +92,9 @@ namespace TMTT{
  double TrackletSeed::secPhiMax(){return secPhiMax_;}
  double TrackletSeed::secPhiMin(){return secPhiMin_;}
 
+ const Stub* TrackletSeed::innerStub() { return innerStub_; }
+ const Stub* TrackletSeed::outerStub() { return outerStub_; }
+
  double TrackletSeed::phi0(){return phi0_;}
  double TrackletSeed::rInv(){return rInv_;}
  double TrackletSeed::tanLambda(){return tanLambda_;}
@@ -101,12 +108,11 @@ namespace TMTT{
 
   phiSec_ = phiSec;
 
-  double dphiSec=M_PI/settings_->numPhiSectors()+2*fmax(
-    fabs(asin(0.5*settings_->invPtToDphi()*settings_->layerRadii().at(0)-asin(0.5*settings_->invPtToDphi()*settings_->chosenRofPhi()))),
-    fabs(asin(0.5*settings_->invPtToDphi()*settings_->layerRadii().at(5)-asin(0.5*settings_->invPtToDphi()*settings_->chosenRofPhi()))));
+  Sector sector;//no eta regions in tracklet-tmtt
+  sector.init(settings_, phiSec_, 0); //no eta regions in tracklet-tmtt
 
-  secPhiMin_ = Utility::wrapRadian(phiSec*2*M_PI/settings_->numPhiSectors() - 0.5*dphiSec);
-  secPhiMax_ = Utility::wrapRadian(secPhiMin() + 2*M_PI/settings_->numPhiSectors() + 2*dphiSec);
+  secPhiMin_ = sector.phiCentre() - sector.sectorHalfWidth();
+  secPhiMax_ = sector.phiCentre() + sector.sectorHalfWidth();
  }
 
  //////////////////////////////////////////////////////////////////////////////////////
@@ -209,7 +215,7 @@ namespace TMTT{
 
   }
 
-  double phi0 = innerStub->phi() - this->secPhiMin() + (secPhiMax() - secPhiMin())/6.0
+  double phi0 = innerStub->phi() - this->secPhiMin() //+ (secPhiMax() - secPhiMin())/6.0
    + asin(0.5*innerStub->r()*settings_->invPtToDphi());
 
   double tanLambda = (innerStub->z() - outerStub->z())*settings_->invPtToDphi() /
