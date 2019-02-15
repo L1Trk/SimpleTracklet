@@ -11,6 +11,8 @@ namespace TMTT{
  //////////////////////////////////////////////////////////////////////////////////////
  TrackletSeed::TrackletSeed(const Stub* outerStub, const Stub* innerStub, unsigned int phiSec, 
    const Settings* settings):
+  innerStub_(innerStub),
+  outerStub_(outerStub),
   settings_(settings)
  {
   seedTypeReduced_ =  TrackletSeed::whichSeedTypeReduced(outerStub, innerStub);
@@ -87,6 +89,9 @@ namespace TMTT{
  unsigned int TrackletSeed::etaSec(){return etaSec_;}
  double TrackletSeed::secPhiMax(){return secPhiMax_;}
  double TrackletSeed::secPhiMin(){return secPhiMin_;}
+
+ const Stub* TrackletSeed::innerStub() { return innerStub_; }
+ const Stub* TrackletSeed::outerStub() { return outerStub_; }
 
  double TrackletSeed::phi0(){return phi0_;}
  double TrackletSeed::rInv(){return rInv_;}
