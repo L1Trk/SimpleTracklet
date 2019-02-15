@@ -3,6 +3,7 @@
 #include "L1Trigger/TrackFindingTMTT/interface/Utility.h"
 #include "L1Trigger/TrackFindingTMTT/interface/StubCluster.h"
 #include "L1Trigger/TrackFindingTMTT/interface/TrackletProjection.h"
+#include <L1Trigger/TrackFindingTMTT/interface/Sector.h>
 
 
 using namespace std;
@@ -107,12 +108,11 @@ namespace TMTT{
 
   phiSec_ = phiSec;
 
-  double dphiSec=M_PI/settings_->numPhiSectors()+2*fmax(
-    fabs(asin(0.5*settings_->invPtToDphi()*settings_->layerRadii().at(0)-asin(0.5*settings_->invPtToDphi()*settings_->chosenRofPhi()))),
-    fabs(asin(0.5*settings_->invPtToDphi()*settings_->layerRadii().at(5)-asin(0.5*settings_->invPtToDphi()*settings_->chosenRofPhi()))));
+  Sector sector;//no eta regions in tracklet-tmtt
+  sector.init(settings_, phiSec_, 0); //no eta regions in tracklet-tmtt
 
-  secPhiMin_ = Utility::wrapRadian(phiSec*2*M_PI/settings_->numPhiSectors() - 0.5*dphiSec);
-  secPhiMax_ = Utility::wrapRadian(secPhiMin() + 2*M_PI/settings_->numPhiSectors() + 2*dphiSec);
+  secPhiMin_ = sector.phiCentre() - sector.sectorHalfWidth();
+  secPhiMax_ = sector.phiCentre() + sector.sectorHalfWidth();
  }
 
  //////////////////////////////////////////////////////////////////////////////////////
