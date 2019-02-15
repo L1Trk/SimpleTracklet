@@ -215,7 +215,7 @@ namespace TMTT{
 
   }
 
-  double phi0 = innerStub->phi() - this->secPhiMin() + (secPhiMax() - secPhiMin())/6.0
+  double phi0 = innerStub->phi() - this->secPhiMin() //+ (secPhiMax() - secPhiMin())/6.0
    + asin(0.5*innerStub->r()*settings_->invPtToDphi());
 
   double tanLambda = (innerStub->z() - outerStub->z())*settings_->invPtToDphi() /
