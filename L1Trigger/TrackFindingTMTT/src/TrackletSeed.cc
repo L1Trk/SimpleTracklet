@@ -37,7 +37,8 @@ namespace TMTT{
   switch( seedTypeReduced_ ){
    case 1:
 
-    for( int layer = 0; layer < 4; ++layer ){
+    // for( int layer = 0; layer < 4; ++layer ){
+    for( int layer = 0; layer < 6; ++layer ){
      barrelProjections_.push_back(this->projectBarrel(layer));
     }
 
@@ -49,7 +50,7 @@ namespace TMTT{
 
    case 2:
 
-    for( int layer = 0; layer < 4; ++layer ){
+    for( int layer = 0; layer < 6; ++layer ){
      barrelProjections_.push_back(this->projectBarrel(layer));
     }
 
@@ -61,7 +62,7 @@ namespace TMTT{
 
    case 3:
 
-    for( int layer = 0; layer < 4; ++layer ){
+    for( int layer = 0; layer < 6; ++layer ){
      barrelProjections_.push_back(this->projectBarrel(layer));
     }
 
