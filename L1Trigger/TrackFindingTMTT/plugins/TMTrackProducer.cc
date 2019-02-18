@@ -393,6 +393,10 @@ namespace TMTT {
       vector<L1fittedTrack> fittedTracksInSec;
       for (const L1track3D& trk : vecTrk3D) {
 
+        if ( settings_->tracklet() ) {
+          if ( trk.iPhiSec() != iPhiSec ) continue;
+        }
+
        // IRT
        //bool OK = (trk.getMatchedTP() != nullptr && trk.getMatchedTP()->pt() > 50 && fabs(trk.getMatchedTP()->eta()) > 1.4 && fabs(trk.getMatchedTP()->eta()) < 1.8);
        //if (trk.getNumStubs() != trk.getNumLayers()) OK = false;
