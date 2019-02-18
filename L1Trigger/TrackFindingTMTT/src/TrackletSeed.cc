@@ -216,13 +216,11 @@ namespace TMTT{
   }
 
   double phi0 = innerStub->phi() - this->secPhiMin() //+ (secPhiMax() - secPhiMin())/6.0
-   + asin(0.5*innerStub->r()*settings_->invPtToDphi());
+   + asin(0.5*innerStub->r()*rInv);
 
-  double tanLambda = (innerStub->z() - outerStub->z())*settings_->invPtToDphi() /
-   2*(asin(0.5*settings_->invPtToDphi()*innerStub->r()) - 
-     asin(0.5*settings_->invPtToDphi()*outerStub->r()));
+  double tanLambda = ( innerStub->z() - outerStub->z() ) * rInv / ( 2 * ( asin( 0.5*rInv*innerStub->r() ) - asin( 0.5*rInv*outerStub->r() ) ) );
 
-  double z0 = innerStub->z() - tanLambda*(2*(asin(0.5*settings_->invPtToDphi()*innerStub->r())));
+  double z0 = innerStub->z() - tanLambda * ( 2 * ( asin( 0.5 * rInv * innerStub->r() ) ) ) / rInv;
 
   rInv_=rInv;
   z0_=z0;
@@ -240,7 +238,7 @@ namespace TMTT{
 
   double phiProjection = phi0_ - asin ( 0.5 * rProjection * rInv_);
 
-  double zProjection = z0_ + 2 * tanLambda_ * asin( 0.5 * rProjection * rInv_);
+  double zProjection = z0_ + 2 * tanLambda_ * asin( 0.5 * rProjection * rInv_) / rInv_;
 
   double phiDerivitive = - 0.5 * rInv_ / sqrt( 1 - pow( 0.5 * rProjection * rInv_ , 2 ) );
 
