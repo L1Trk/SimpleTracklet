@@ -23,8 +23,7 @@ namespace TMTT{
 
   layer-=1;
 
-
-  double stubPhiInSector = stub->phi() - tracklet_->secPhiMin() + asin(0.5*stub->r()*settings_->invPtToDphi());
+  double stubPhiInSector = stub->phi() - tracklet_->secPhiMin();// + asin(0.5*stub->r()*settings_->invPtToDphi());
 
   double deltaR = stub->r() - tracklet_->barrelProjections().at(layer).rProjection();
   double deltaPhi = stubPhiInSector - tracklet_->barrelProjections().at(layer).phiProjection() - deltaR*tracklet_->barrelProjections().at(layer).phiDerivitive();
@@ -50,9 +49,11 @@ namespace TMTT{
    disk-=11;
   }
 
+  double stubPhiInSector = stub->phi() - tracklet_->secPhiMin();// + asin(0.5*stub->r()*settings_->invPtToDphi());
+
   double deltaZ = stub->z() - tracklet_->diskProjections().at(disk).zProjection();
 
-  double deltaPhi = stub->phi() - tracklet_->diskProjections().at(disk).phiProjection() - deltaZ * tracklet_->diskProjections().at(disk).phiDerivitive();
+  double deltaPhi = stubPhiInSector - tracklet_->diskProjections().at(disk).phiProjection() - deltaZ * tracklet_->diskProjections().at(disk).phiDerivitive();
 
   double deltaR = stub->r() - tracklet_->diskProjections().at(disk).rProjection() - deltaZ * tracklet_->diskProjections().at(disk).rDerivitive();
 
