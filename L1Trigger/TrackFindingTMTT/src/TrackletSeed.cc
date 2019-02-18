@@ -261,7 +261,7 @@ namespace TMTT{
    zProjection = -zProjection;
   }
 
-  double tmp = rInv_ * ( zProjection - z0_ ) / 2.0 * tanLambda_;
+  double tmp = rInv_ * ( zProjection - z0_ ) / ( 2.0 * tanLambda_ );
 
   double rProjection = 2.0 * sin( tmp ) / rInv_;
 
