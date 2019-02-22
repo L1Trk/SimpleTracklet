@@ -202,17 +202,15 @@ namespace TMTT{
  //////////////////////////////////////////////////////////////////////////////////////
  void TrackletSeed::seed(const Stub* outerStub, const Stub* innerStub, unsigned int seedType){ //Calculates initial helix parameters of tracklets
 
-  double deltaPhi = Utility::wrapRadian(outerStub->phi() - innerStub->phi());
+  double deltaPhi = Utility::wrapRadian( innerStub->phi() - outerStub->phi() );
 
-  double displacement = sqrt(pow(outerStub->r(),2) + pow(innerStub->r(),2) 
+  double displacement = sqrt( pow( outerStub->r(), 2 ) + pow( innerStub->r(), 2 )
     - 2*outerStub->r()*innerStub->r()*cos(deltaPhi));
 
   double rInv = 2*sin(deltaPhi)/displacement;
 
-  if(seedType==2 && innerStub->r() > innerStub->r()){
-
+  if(seedType==2 && innerStub->r() > outerStub->r()){
    rInv = -rInv;
-
   }
 
   double phi0 = innerStub->phi() - this->secPhiMin() //+ (secPhiMax() - secPhiMin())/6.0
