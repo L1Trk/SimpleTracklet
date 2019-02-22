@@ -24,7 +24,9 @@ TMTrackProducer = cms.EDProducer('TMTrackProducer',
 
 #--- Uncomment for Simple Tracklet 
 TMTrackProducer.TrackletSettings.Tracklet = cms.bool( True )
-
+TMTrackProducer.PhiSectors.NumPhiSectors = cms.uint32( 9 ) 
+TMTrackProducer.DupTrkRemoval.DupTrkAlgFit = cms.uint32( 0 ) #need new DR algo for hybrid
+TMTrackProducer.StubDigitize.EnableDigitize = cms.bool( False ) #need new digitisation ranges for 9 sector hourglass
 
 #--- Disable internal digitisation of SimpleLR fitter, as it was never retuned for nonants.
 #TMTrackProducer.TrackFitSettings.DigitizeSLR = cms.bool(False),

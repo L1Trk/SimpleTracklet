@@ -86,7 +86,7 @@ namespace TMTT{
  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
  L1track3D TrackletMatched::returntrack3D(){
   L1track3D track = L1track3D(settings_, stublist_, pair<unsigned int, unsigned int>(0, 0), 
-    pair<float,float>(tracklet_->rInv(), tracklet_->phi0()), pair<float, float>(tracklet_->z0(), 
+    pair<float,float>(tracklet_->rInv()/settings_->invPtToInvR(), tracklet_->phi0() + tracklet_->secPhiMin()), pair<float, float>(tracklet_->z0(), 
      tracklet_->tanLambda()), tracklet_->phiSec(), 0, 0, false);
  return track;
  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

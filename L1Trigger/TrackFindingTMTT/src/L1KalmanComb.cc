@@ -362,7 +362,7 @@ L1fittedTrack L1KalmanComb::fit(const L1track3D& l1track3D){
     std::cout << "Track Finding candidate in [phi_sec, eta_reg] = [" << l1track3D.iPhiSec() << ", " << l1track3D.iEtaReg() << "]";
     std::cout <<"  HT (M,C) = ("<<l1track3D.getCellLocationHT().first << ", " 
 	                        << l1track3D.getCellLocationHT().second << ")  q/pt="<<
-                  l1track3D.qOverPt()<<" tanL="<<l1track3D.tanLambda()<<std::endl;
+                  l1track3D.qOverPt()<< ", phi0= "<< l1track3D.phi0() << ", z0 = " <<l1track3D.z0() <<", tanL="<<l1track3D.tanLambda()<<std::endl;
     printTP( cout, tpa );
     if( getSettings()->kalmanDebugLevel() >= 2 ){
       printStubLayers( cout, stubs );

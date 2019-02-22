@@ -321,6 +321,8 @@ namespace TMTT {
     }
 
    }
+ 
+   std::cout << "N. Tracklet Matched Candidates " << trackletSeeds.size() << std::endl;
   }
  
    //=== Make 3D tracks, optionally running r-z track filters (such as Seed Filter) & duplicate track removal.
