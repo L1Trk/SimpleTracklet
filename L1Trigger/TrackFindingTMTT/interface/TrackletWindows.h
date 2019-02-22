@@ -25,7 +25,7 @@ namespace TMTT{
      { 0,    5.5,    15.0, 1.5,  2.0,  0,    1.5,  0.7  },//layer 1 z windows
      { 0,    3.5,    15.0, 1.25, 0,    0,    0,    0    },//layer 2 z windows
      { 0.7,  0,      9.0,  0,    0,    0,    0,    0    },//layer 3 z windows
-     { 3.0,  7.0,    0,    0,    0,    0,    0,    3.0  },//layer 4 z windows
+     { 3.0,  0,      7.0,  0,    0,    0,    0,    3.0  },//layer 4 z windows
      { 3.0,  8.0,    0,    0,    0,    0,    0,    3.0  },//layer 5 z windows
      { 4.0,  9.5,    0,    0,    0,    0,    0,    0    } //layer 6 z windows
     },
@@ -33,7 +33,7 @@ namespace TMTT{
      //zero elements are unused
     {
       { 0.2,    0,    0,    0,    0.1,  0,    0,    0.2    },//disk 1 rphi windows
-      { 0.2,    0,    0,    0,    0.1,  0,    0.1,  0.2    },//disk 2 rphi windows
+      { 0.2,    0,    0,    0,    0.1,  0.1,  0.1,  0.2    },//disk 2 rphi windows
       { 0.25,   0,    0,    0.15, 0,    0.2,  0.15, 0.2    },//disk 3 rphi windows
       { 0.5,    0,    0,    0.2,  0,    0.3,  0.5,  0.2    },//disk 4 rphi windows
       { 0,      0,    0,    0.25, 0.1,  0.5,  0,    0      } //disk 5 rphi windows
@@ -41,7 +41,7 @@ namespace TMTT{
     rphiMatchingWindowsDisk2S //first index (row) is disk number, second index (column) is tracklet seed type
      //zero elements are unused
     {
-      { 0.5,  0.8,  0,    0,    0.1,  0,    0,    0.5  },//disk 1 rphi windows
+      { 0.5,  0.8,  0,    0,    0,    0,    0,    0.5  },//disk 1 rphi windows
       { 0.5,  0.8,  0,    0,    0,    0.5,  0.15, 0.5  },//disk 2 rphi windows
       { 0.5,  0,    0,    0.15, 0,    0.2,  0.25, 0.5  },//disk 3 rphi windows
       { 0.5,  0,    0,    0.2,  0,    0.25, 0.5,  0.5  },//disk 4 rphi windows
