@@ -315,7 +315,7 @@ namespace TMTT {
       }
      }
     }
-    if(trackletMatched.stublist().size() > 1 ){
+    if(trackletMatched.stublist().size() > 3 ){
     L1track3D track = trackletMatched.returntrack3D();
      trackletsMatched3D.push_back(track);
     }
@@ -396,7 +396,7 @@ namespace TMTT {
       for (const L1track3D& trk : vecTrk3D) {
 
         if ( settings_->tracklet() ) {
-          if ( trk.iPhiSec() != iPhiSec ) continue;
+          if ( trk.iPhiSec() != iPhiSec || trk.iEtaReg() != iEtaReg ) continue;
         }
 
        // IRT
