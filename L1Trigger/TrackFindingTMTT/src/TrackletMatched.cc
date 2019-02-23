@@ -1,6 +1,7 @@
 #include "L1Trigger/TrackFindingTMTT/interface/TrackletSeed.h"
 #include "L1Trigger/TrackFindingTMTT/interface/TrackletMatched.h"
 #include "L1Trigger/TrackFindingTMTT/interface/TrackletProjection.h"
+#include <L1Trigger/TrackFindingTMTT/interface/Sector.h>
 
 
 namespace TMTT{
@@ -11,6 +12,8 @@ namespace TMTT{
   tracklet_(tracklet),
   settings_(settings)
  {
+  stublist_.push_back( tracklet_->innerStub() );
+  stublist_.push_back( tracklet_->outerStub() );
  };
 
  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -85,9 +88,17 @@ namespace TMTT{
 
  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
  L1track3D TrackletMatched::returntrack3D(){
+
+  unsigned int etaReg = 0; // Bad, as this default value is an actual eta region
+ for (unsigned int iEtaReg = 0; iEtaReg < settings_->numEtaRegions(); iEtaReg++) {
+  Sector sector;
+  sector.init( settings_, tracklet_->phiSec(), iEtaReg );
+  if ( sector.inside( stublist_[0] ) ) etaReg = iEtaReg;
+ }
+
   L1track3D track = L1track3D(settings_, stublist_, pair<unsigned int, unsigned int>(0, 0), 
     pair<float,float>(tracklet_->rInv()/settings_->invPtToInvR(), tracklet_->phi0() + tracklet_->secPhiMin()), pair<float, float>(tracklet_->z0(), 
-     tracklet_->tanLambda()), tracklet_->phiSec(), 0, 0, false);
+     tracklet_->tanLambda()), tracklet_->phiSec(), etaReg, 0, false);
  return track;
  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
  /*
