@@ -254,9 +254,11 @@ namespace TMTT {
        for (const Stub* innerStub: barrelStubs.at(innerSeedLayer)) {
         for (const Stub* outerStub: barrelStubs.at(outerSeedLayer)) {
 
-
+         if(std::abs(innerStub->phi() - outerStub->phi()) <
+           (settings_->invPtToInvR() * std::abs( innerStub->r() - outerStub->r() ) / ( 2*settings_->houghMinPt() ) ) ){
          TrackletSeed trackletSeed(outerStub, innerStub, iPhiSec, settings_);
          trackletSeeds.push_back(trackletSeed);
+         }
         }
        }
       }
@@ -273,7 +275,9 @@ namespace TMTT {
        for (const Stub* innerStub: diskStubs.at(innerSeedLayer)) {
         for (const Stub* outerStub: diskStubs.at(outerSeedLayer)) {
 
-
+         if(std::abs(innerStub->phi() - outerStub->phi()) <
+           (settings_->invPtToInvR() * std::abs( innerStub->r() - outerStub->r() ) / ( 2*settings_->houghMinPt() ) ) ){
+          
          TrackletSeed trackletSeed(outerStub, innerStub, iPhiSec, settings_);
          trackletSeeds.push_back(trackletSeed);
         }
@@ -287,9 +291,11 @@ namespace TMTT {
 
       for (const Stub* innerStub: barrelStubs.at(innerSeedLayer)) {
        for (const Stub* outerStub: diskStubs.at(outerSeedLayer)) {
-
+         if(std::abs(innerStub->phi() - outerStub->phi()) <
+           (settings_->invPtToInvR() * std::abs( innerStub->r() - outerStub->r() ) / ( 2*settings_->houghMinPt() ) ) ){
         TrackletSeed trackletSeed(outerStub, innerStub, iPhiSec, settings_);
         trackletSeeds.push_back(trackletSeed);
+        }
        }
       }
      }
