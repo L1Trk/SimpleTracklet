@@ -4,10 +4,11 @@
 cmsrel CMSSW_10_2_5
 cd CMSSW_10_2_5/src/
 cmsenv
-git cms-init
-git remote add -t SimpleTracklet L1Trk https://github.com/L1Trk/SimpleTracklet.git
+git init
+git config core.sparsecheckout true
+touch .git/info/sparse-checkout
+echo "/L1Trigger/TrackFindingTMTT" >> .git/info/sparse-checkoutgit remote add -t SimpleTracklet L1Trk https://github.com/L1Trk/SimpleTracklet.git
 git fetch L1Trk SimpleTracklet
-echo "/L1Trigger/TrackFindingTMTT" >> .git/info/sparse-checkout
 git checkout -b myBranch L1Trk/SimpleTracklet
 ```
 
