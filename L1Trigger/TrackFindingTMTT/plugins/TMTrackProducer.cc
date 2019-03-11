@@ -254,31 +254,26 @@ namespace TMTT {
        for (const Stub* innerStub: barrelStubs.at(innerSeedLayer)) {
         for (const Stub* outerStub: barrelStubs.at(outerSeedLayer)) {
 
-          if(std::abs(innerStub->phi() - outerStub->phi()) <
-           (settings_->invPtToInvR() * std::abs( innerStub->r() - outerStub->r() ) / ( 2*settings_->houghMinPt() ) ) ){
+          if( std::abs( innerStub->phi() - outerStub->phi() ) <
+            ( settings_->invPtToInvR() * std::abs( innerStub->r() - outerStub->r() ) / ( 2*settings_->houghMinPt() ) ) ){
 
-          // Cuts on seeds should be moved into TrackletSeed?
-          // Also perhaps not needed if using VMs?
-          double z1 = innerStub->z();
-          double z2 = outerStub->z();
-          double r1 = innerStub->r();
-          double r2 = outerStub->r();
-          double zcrude=z1-(z2-z1)*r1/(r2-r1);
-          if (fabs(zcrude)>30) {
-            continue;
-          }
+            // Cuts on seeds should be moved into TrackletSeed?
+            // Also perhaps not needed if using VMs?
+            double z1 = innerStub->z();
+            double z2 = outerStub->z();
+            double r1 = innerStub->r();
+            double r2 = outerStub->r();
+            double zcrude=z1-(z2-z1)*r1/(r2-r1);
+            if (fabs(zcrude)>30) continue;
 
-         TrackletSeed trackletSeed(outerStub, innerStub, iPhiSec, settings_);
+            TrackletSeed trackletSeed(outerStub, innerStub, iPhiSec, settings_);
 
-          if ( fabs( trackletSeed.rInv() ) > 0.0057 ) {
-            continue;
-          }
+            if ( fabs( trackletSeed.rInv() ) > 0.0057 ) continue;
 
-          if ( fabs( trackletSeed.z0() ) > 15.0 ) {
-            continue;
-          }
+            if ( fabs( trackletSeed.z0() ) > 15.0 ) continue;
 
-         trackletSeeds.push_back(trackletSeed);
+
+            trackletSeeds.push_back(trackletSeed);
          }
         }
        }
@@ -296,38 +291,36 @@ namespace TMTT {
        for (const Stub* innerStub: diskStubs.at(innerSeedLayer)) {
         for (const Stub* outerStub: diskStubs.at(outerSeedLayer)) {
 
-          if(std::abs(innerStub->phi() - outerStub->phi()) <
-           (settings_->invPtToInvR() * std::abs( innerStub->r() - outerStub->r() ) / ( 2*settings_->houghMinPt() ) ) ){
+          if( std::abs(innerStub->phi() - outerStub->phi() ) <
+            ( settings_->invPtToInvR() * std::abs( innerStub->r() - outerStub->r() ) / ( 2*settings_->houghMinPt() ) ) ){
 
-          double z1 = innerStub->z();
-          double z2 = outerStub->z();
-          double r1 = innerStub->r();
-          double r2 = outerStub->r();
-          double zcrude=z1-(z2-z1)*r1/(r2-r1);
-          if (fabs(zcrude)>30) {
-            continue;
+            double z1 = innerStub->z();
+            double z2 = outerStub->z();
+            double r1 = innerStub->r();
+            double r2 = outerStub->r();
+            double zcrude=z1-(z2-z1)*r1/(r2-r1);
+            if (fabs(zcrude)>30) {
+              continue;
+            }
+
+            TrackletSeed trackletSeed(outerStub, innerStub, iPhiSec, settings_);
+
+            // Check if this could be PS + 2S?
+            if ( !outerStub->psModule() || ! innerStub->psModule() ) continue;
+            // if ( !isPSmodule1 && !isPSmodule2 ) continue;
+
+            if (fabs(r1-r2)/fabs(z1-z2)<0.1) continue;
+
+            if ( fabs( trackletSeed.rInv() ) > 0.0057 ) continue;
+
+            if ( fabs( trackletSeed.z0() ) > 15.0 ) continue;
+
+
+            double tmp=0.5*r1*trackletSeed.rInv();
+            if (fabs(tmp)>=1.0) continue;
+
+            trackletSeeds.push_back(trackletSeed);
           }
-
-          TrackletSeed trackletSeed(outerStub, innerStub, iPhiSec, settings_);
-
-          // Check if this could be PS + 2S?
-          if ( !outerStub->psModule() || ! innerStub->psModule() ) continue;
-          // if ( !isPSmodule1 && !isPSmodule2 ) continue;
-
-          if (fabs(r1-r2)/fabs(z1-z2)<0.1) continue;
-
-          if ( fabs( trackletSeed.rInv() ) > 0.0057 ) {
-            continue;
-          }
-
-          if ( fabs( trackletSeed.z0() ) > 15.0 ) {
-            continue;
-          }
-
-          double tmp=0.5*r1*trackletSeed.rInv();
-          if (fabs(tmp)>=1.0) continue;
-
-         trackletSeeds.push_back(trackletSeed);
         }
        }
       }
@@ -340,8 +333,8 @@ namespace TMTT {
       for (const Stub* innerStub: barrelStubs.at(innerSeedLayer)) {
        for (const Stub* outerStub: diskStubs.at(outerSeedLayer)) {
 
-          if(std::abs(innerStub->phi() - outerStub->phi()) <
-           (settings_->invPtToInvR() * std::abs( innerStub->r() - outerStub->r() ) / ( 2*settings_->houghMinPt() ) ) ){
+          if( std::abs(innerStub->phi() - outerStub->phi() ) <
+            ( settings_->invPtToInvR() * std::abs( innerStub->r() - outerStub->r() ) / ( 2*settings_->houghMinPt() ) ) ){
 
           double z1 = innerStub->z();
           double z2 = outerStub->z();
@@ -358,15 +351,11 @@ namespace TMTT {
 
           TrackletSeed trackletSeed(outerStub, innerStub, iPhiSec, settings_);
 
-          if ( fabs( trackletSeed.rInv() ) > 0.0057 ) {
-            continue;
-          }
+          if ( fabs( trackletSeed.rInv() ) > 0.0057 ) continue;
 
-          if ( fabs( trackletSeed.z0() ) > 15.0 ) {
-            continue;
-          }
+          if ( fabs( trackletSeed.z0() ) > 15.0 ) continue;
 
-        trackletSeeds.push_back(trackletSeed);
+          trackletSeeds.push_back(trackletSeed);
         }
        }
       }
