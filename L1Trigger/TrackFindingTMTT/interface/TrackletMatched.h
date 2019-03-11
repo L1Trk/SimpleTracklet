@@ -27,6 +27,8 @@ class TrackletMatched{
 
   std::vector < const Stub* > stublist();
   L1track3D returntrack3D();
+
+  unsigned int nLayers();
  
   private:
   

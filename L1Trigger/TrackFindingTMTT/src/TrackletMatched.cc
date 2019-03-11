@@ -107,4 +107,18 @@ namespace TMTT{
                        unsigned int iPhiSec, unsigned int iEtaReg, unsigned int optoLinkID, bool mergedHTcell) :}
 */
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+unsigned int TrackletMatched::nLayers() {
+  std::vector<int> allLayers;
+  for (const Stub* stub: this->stublist()) {
+    allLayers.push_back( stub->layerId() );
+  }
+  std::sort(allLayers.begin(), allLayers.end());
+  auto last = std::unique( allLayers.begin(), allLayers.end() );
+  allLayers.erase( last, allLayers.end() );
+  return allLayers.size();
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 };
