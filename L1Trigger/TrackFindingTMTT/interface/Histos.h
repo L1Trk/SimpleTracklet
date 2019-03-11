@@ -34,6 +34,7 @@ class HTrphi;
 class Get3Dtracks;
 class L1fittedTrack;
 class L1fittedTrk4and5;
+class L1track3D;
 
 class Histos {
 
@@ -46,7 +47,7 @@ public:
   // Book & fill all histograms.
   void book();
   void fill(const InputData& inputData, const matrix<Sector>& mSectors, const matrix<HTrphi>& mHtPhis, 
-    	    const matrix<Get3Dtracks> mGet3Dtrks, const std::map<std::string,std::vector<L1fittedTrack>>& fittedTracks);
+    	    const matrix<Get3Dtracks> mGet3Dtrks, const vector<L1track3D> matchedTracklets, const std::map<std::string,std::vector<L1fittedTrack>>& fittedTracks);
 
   // Print tracking performance summary & make tracking efficiency histograms.
   void endJobAnalysis();
@@ -68,7 +69,7 @@ private:
   void bookRphiHT();
   void bookRZfilters();
   void bookStudyBusyEvents();
-  void bookTrackCands(bool withRZfilter);
+  void bookTrackCands(bool withRZfilter, bool tracklet=false);
   void bookTrackFitting();
 
   // Fill histograms for specific topics.
@@ -79,10 +80,11 @@ private:
   void fillStudyBusyEvents(const InputData& inputData, const matrix<Sector>& mSectors, const matrix<HTrphi>& mHtRphis, 
     		           const matrix<Get3Dtracks> mGet3Dtrks);
   void fillTrackCands(const InputData& inputData, const matrix<Get3Dtracks> mGet3Dtrks, bool withRZfilter);
+  void fillTrackletCands(const InputData& inputData, const vector<L1track3D> matchedTracklets );
   void fillTrackFitting(const InputData& inputData, const std::map<std::string,std::vector<L1fittedTrack>>& fittedTracks);
 
   // Produce plots of tracking efficiency after HZ or after r-z track filter (run at end of job)
-  void plotTrackEfficiency(bool withRZfilter);
+  void plotTrackEfficiency(bool withRZfilter, bool tracklet=false);
   // Produce plots of tracking efficiency after track fit (run at end of job).
   void plotTrackEffAfterFit(string fitName);
 
@@ -90,7 +92,7 @@ private:
 
 
   // Print summary of track-finding performance after HT or after r-z track filter.
-  void printTrackPerformance(bool withRZfilter);
+  void printTrackPerformance(bool withRZfilter, bool tracklet=false);
 
   // Print summary of track-finding performance after helix fit for given track fitter.
   void printFitTrackPerformance(string fitName);

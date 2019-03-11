@@ -68,6 +68,8 @@ void Histos::book() {
   this->bookTrackCands(false);
   // Book histograms studying 3D track candidates found after r-z track filter.
   if (ranRZfilter_) this->bookTrackCands(true);
+  // Book histograms studying matched tracklet candidates.
+  this->bookTrackCands(false, true);
   // Book histograms studying track fitting performance
   this->bookTrackFitting();
 }
@@ -75,7 +77,7 @@ void Histos::book() {
 //=== Fill all histograms
 
 void Histos::fill(const InputData& inputData, const matrix<Sector>& mSectors, const matrix<HTrphi>& mHtRphis, 
-    	          const matrix<Get3Dtracks> mGet3Dtrks, const std::map<std::string,std::vector<L1fittedTrack>>& fittedTracks) 
+    	          const matrix<Get3Dtracks> mGet3Dtrks, const vector<L1track3D> matchedTracklets, const std::map<std::string,std::vector<L1fittedTrack>>& fittedTracks) 
 {
   // Don't bother filling histograms if user didn't request them via TFileService in their cfg.
   if ( ! this->enabled() ) return;
@@ -90,10 +92,15 @@ void Histos::fill(const InputData& inputData, const matrix<Sector>& mSectors, co
   this->fillRZfilters(mGet3Dtrks);
   // Fill histograms for studying freak, extra large events at HT.
   this->fillStudyBusyEvents(inputData, mSectors, mHtRphis, mGet3Dtrks);
+  if ( settings_->tracklet() ) {
+    this->fillTrackletCands(inputData, matchedTracklets);   
+  }
   // Fill histograms studying 3D track candidates found after HT.
   this->fillTrackCands(inputData, mGet3Dtrks, false);
   // Fill histograms studying 3D track candidates found after r-z track filter.
-  if (ranRZfilter_) this->fillTrackCands(inputData, mGet3Dtrks, true);
+  if (ranRZfilter_) this->fillTrackCands(inputData, mGet3Dtrks, true);    
+
+
   // Fill histograms studying track fitting performance
   this->fillTrackFitting(inputData, fittedTracks);
 }
@@ -957,11 +964,12 @@ void Histos::fillRZfilters(const matrix<Get3Dtracks>& mGet3Dtrks) {
 
 //=== Book histograms studying track candidates found by Hough Transform.
 
-void Histos::bookTrackCands(bool withRZfilter) {
+void Histos::bookTrackCands(bool withRZfilter, bool tracklet) {
 
   // Now book histograms for studying tracking in general.
 
   string tName = withRZfilter  ?  "RZ"  :  "HT";
+  if ( tracklet ) tName = "tracklet";
 
   // Define lambda function to facilitate adding "tName" to directory & histogram names.
   //auto addn = [tName](string s){ return TString::Format("%s_%s", s.c_str(), tName.c_str()).Data(); };
@@ -1112,6 +1120,93 @@ void Histos::bookTrackCands(bool withRZfilter) {
 
   hisNumStubsOnLayer_[tName] = inputDir.make<TH1F>(addn("NumStubsOnLayer"),"; Layer occupancy;",16,1,17); 
 }
+
+
+//=== Fill histograms studying track candidates found before track fit is run.
+
+void Histos::fillTrackletCands(const InputData& inputData, const vector<L1track3D> matchedTracklets ) { 
+
+  string tName = "tracklet";
+
+  profNumTrackCands_[tName]->Fill( 1.0, matchedTracklets.size() ); // Plot mean number of tracks/event.
+
+  // for (const auto& tracklet : matchedTracklets) {
+  //   if ( tracklet.pt() < 3 ) std::cout << "Small track pt : " << tracklet.pt() << std::endl;
+  // }
+ 
+
+  // Count total number of tracking particles in the event that were reconstructed,
+  // counting also how many of them were reconstructed multiple times (duplicate tracks).
+  unsigned int nRecoedTPsForEff = 0; // Total no. of TPs used for the efficiency measurement that were reconstructed as at least one track.
+  unsigned int nRecoedTPs = 0; // Total no. of TPs that were reconstructed as at least one track.
+  unsigned int nTrksMatchingTPs = 0; // Total no. of tracks that all TPs were reconstructed as
+
+  const vector<TP>&  vTPs = inputData.getTPs();
+
+  for (const TP& tp: vTPs) {
+
+    bool tpRecoed = false;
+    bool tpRecoedPerfect = false;
+    vector<const L1track3D*> assocRecoTrk;
+
+    // Loop over track candidates, looking for those associated to given TP.
+    for (const L1track3D& trk : matchedTracklets) {
+      if (trk.getMatchedTP() != nullptr) {
+        if (trk.getMatchedTP()->index() == tp.index()) assocRecoTrk.push_back(&trk); 
+      }
+    }
+
+    unsigned int nTrk = assocRecoTrk.size(); 
+    if (nTrk > 0) {
+      tpRecoed = true;            // This TP was reconstructed at least once in tracker.
+      nTrksMatchingTPs += nTrk;   // Increment sum by no. of tracks this TP was reconstructed as
+      for (const L1track3D* assTrk : assocRecoTrk) {
+        if (assTrk->getPurity() == 1.) tpRecoedPerfect = true; 
+      }
+    }
+
+
+    if (tpRecoed) {
+      // Increment sum each time a TP is reconstructed at least once inside Tracker
+      if (tp.useForEff()) nRecoedTPsForEff++;
+      if (tp.useForAlgEff()) {
+        hisRecoTPinvptForAlgEff_[tName]->Fill(1./tp.pt());
+        hisRecoTPptForAlgEff_[tName]->Fill(tp.pt());
+        hisRecoTPetaForAlgEff_[tName]->Fill(tp.eta());
+        hisRecoTPphiForAlgEff_[tName]->Fill(tp.phi0());
+        hisRecoTPd0ForAlgEff_[tName]->Fill(fabs(tp.d0()));
+        hisRecoTPz0ForAlgEff_[tName]->Fill(fabs(tp.z0()));
+
+        // Plot efficiency in jets
+        if ( tp.tpInJet() ) {
+          hisRecoTPinvptForAlgEff_inJetPtG30_[tName]->Fill(1./tp.pt());
+        }
+        if ( tp.tpInHighPtJet() ) {
+          hisRecoTPinvptForAlgEff_inJetPtG100_[tName]->Fill(1./tp.pt());           
+        }
+        if ( tp.tpInVeryHighPtJet() ) {
+          hisRecoTPinvptForAlgEff_inJetPtG200_[tName]->Fill(1./tp.pt());           
+        }
+
+        if (tpRecoedPerfect) {
+          hisPerfRecoTPinvptForAlgEff_[tName]->Fill(1./tp.pt());
+          hisPerfRecoTPptForAlgEff_[tName]->Fill(tp.pt());
+          hisPerfRecoTPetaForAlgEff_[tName]->Fill(tp.eta());
+        }
+      }
+      nRecoedTPs++; 
+    }
+  }
+
+  //--- Plot mean number of tracks/event, counting number due to different kinds of duplicates
+  // Plot number of TPs used for the efficiency measurement that are reconstructed. 
+  profNumTrackCands_[tName]->Fill(7.0, nRecoedTPsForEff);
+  // Plot number of TPs that are reconstructed. 
+  profNumTrackCands_[tName]->Fill(6.0, nRecoedTPs);
+  // Plot number of TP that are reconstructed. Count +1 for each track they are reconstructed as.
+  profNumTrackCands_[tName]->Fill(2.0, nTrksMatchingTPs);
+}
+
 
 //=== Fill histograms studying track candidates found before track fit is run.
 
@@ -2745,9 +2840,10 @@ void Histos::fillTrackFitting( const InputData& inputData, const map<string,vect
 
 //=== Produce plots of tracking efficiency after HT or after r-z track filter (run at end of job).
 
-void Histos::plotTrackEfficiency(bool withRZfilter) {
+void Histos::plotTrackEfficiency(bool withRZfilter, bool tracklet) {
 
   string tName = withRZfilter  ?  "RZ"  :  "HT";
+  if ( tracklet ) tName = "tracklet";
 
   // Define lambda function to facilitate adding "tName" to directory & histogram names.
   auto addn = [tName](string s){ return TString::Format("%s_%s", s.c_str(), tName.c_str()); };
@@ -2909,9 +3005,10 @@ void Histos::makeEfficiencyPlot( TFileDirectory &inputDir, TEfficiency* outputEf
 
 //=== Print summary of track-finding performance after HT or after r-z track filter.
 
-void Histos::printTrackPerformance(bool withRZfilter) {
+void Histos::printTrackPerformance(bool withRZfilter, bool tracklet) {
 
   string tName = withRZfilter  ?  "RZ"  :  "HT";
+  if ( tracklet ) tName = "tracklet";
 
   float numTrackCands = profNumTrackCands_[tName]->GetBinContent(1); // No. of track cands
   float numTrackCandsErr = profNumTrackCands_[tName]->GetBinError(1); // No. of track cands uncertainty
@@ -2922,9 +3019,16 @@ void Histos::printTrackPerformance(bool withRZfilter) {
   float fracFake = numFakeTracks/(numTrackCands + 1.0e-6);
   float fracDup = numExtraDupTracks/(numTrackCands + 1.0e-6);
 
+  std::cout << "numTrackCands : " << numTrackCands << std::endl;
+  std::cout << "numMatchedTrackCandsIncDups : " << numMatchedTrackCandsIncDups << std::endl;
+  std::cout << "numMatchedTrackCandsExcDups : " << numMatchedTrackCandsExcDups << std::endl;
+  std::cout << "numFakeTracks : " << numFakeTracks << std::endl;
+  std::cout << "numExtraDupTracks : " << numExtraDupTracks << std::endl;
+
   float numStubsOnTracks = profStubsOnTracks_[tName]->GetBinContent(1);
   float meanStubsPerTrack = numStubsOnTracks/(numTrackCands + 1.0e-6); //protection against demoninator equals zero.
   unsigned int numRecoTPforAlg = hisRecoTPinvptForAlgEff_[tName]->GetEntries();
+
   // Histograms of input truth particles (e.g. hisTPinvptForAlgEff_), used for denominator of efficiencies, are identical, 
   // irrespective of whether made after HT or after r-z track filter, so always use the former.
   unsigned int numTPforAlg     = hisTPinvptForAlgEff_["HT"]->GetEntries();
@@ -2938,7 +3042,10 @@ void Histos::printTrackPerformance(bool withRZfilter) {
   cout.precision(4);
 
   cout<<"========================================================================="<<endl;
-  if (withRZfilter) {
+  if ( tracklet ) {
+    cout<<"               TRACK-FINDING SUMMARY AFTER TRACKLET             "<<endl;
+  }
+  else if (withRZfilter) {
     cout<<"               TRACK-FINDING SUMMARY AFTER R-Z TRACK FILTER            "<<endl;
   } else {
     cout<<"               TRACK-FINDING SUMMARY AFTER HOUGH TRANSFORM             "<<endl;
@@ -3005,6 +3112,9 @@ void Histos::endJobAnalysis() {
 
   // Produce plots of tracking efficiency using track candidates found after HT.
   this->plotTrackEfficiency(false);
+
+  // Produce plots of tracking efficiency using track candidates found after tracklet.
+  this->plotTrackEfficiency(false, true);
 
   // Optionally produce plots of tracking efficiency using track candidates found after r-z track filter.
   if (ranRZfilter_) this->plotTrackEfficiency(true);
@@ -3085,6 +3195,8 @@ void Histos::endJobAnalysis() {
 
   //--- Print summary of track-finding performance after HT
   this->printTrackPerformance(false);
+  //--- Print summary of track-finding performance after matched tracklet step
+  this->printTrackPerformance(false, true);
   //--- Optionally print summary of track-finding performance after r-z track filter.
   if (ranRZfilter_) this->printTrackPerformance(true);
 
