@@ -7,7 +7,8 @@ cmsenv
 git init
 git config core.sparsecheckout true
 touch .git/info/sparse-checkout
-echo "/L1Trigger/TrackFindingTMTT" >> .git/info/sparse-checkoutgit remote add -t SimpleTracklet L1Trk https://github.com/L1Trk/SimpleTracklet.git
+echo "/L1Trigger/TrackFindingTMTT" >> .git/info/sparse-checkout
+git remote add -t SimpleTracklet L1Trk https://github.com/L1Trk/SimpleTracklet.git
 git fetch L1Trk SimpleTracklet
 git checkout -b myBranch L1Trk/SimpleTracklet
 ```
