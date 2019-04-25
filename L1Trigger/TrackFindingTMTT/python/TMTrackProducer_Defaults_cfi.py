@@ -100,7 +100,7 @@ TMTrackProducer_params = cms.PSet(
   #=== Division of Tracker into phi sectors.
 
   PhiSectors = cms.PSet(
-     NumPhiOctants      = cms.uint32(9),    # Divisions of Tracker at DTC
+     NumPhiNonants      = cms.uint32(9),    # Divisions of Tracker at DTC
      NumPhiSectors      = cms.uint32(18),   # Divisions of Tracker at GP.
      ChosenRofPhi       = cms.double(61.273), # Use phi of track at this radius for assignment of stubs to phi sectors & also for one of the axes of the r-phi HT. If ChosenRofPhi=0, then use track phi0. - Should be an integer multiple of the stub r digitisation granularity.
      #--- You can set one or both the following parameters to True.
@@ -141,7 +141,8 @@ TMTrackProducer_params = cms.PSet(
      MiniHoughNbinsPhi = cms.uint32(2),   # Number of mini cells along phi axis inside each normal HT cell.
      MiniHoughMinPt    = cms.double(3.0), # Below this Pt threshold, the mini HT will not be used, to reduce sensitivity to scattering, with instead tracks found by 1st stage coarse HT sent to output. (HT cell numbering remains as if mini HT were in use everywhere).
      MiniHoughDontKill = cms.bool(False), # If true, allows tracks found by 1st stage coarse HT to be output if 2nd stage mini HT finds no tracks.
-     MiniHoughDontKillMinPt = cms.double(8.0) # If MiniHoughDontKill=True, this option restricts it to keep 1st stage HT tracks only if their Pt is exceeds this cut. (Used to improve electron tracking above this threshold).
+     MiniHoughDontKillMinPt = cms.double(8.0), # If MiniHoughDontKill=True, this option restricts it to keep 1st stage HT tracks only if their Pt is exceeds this cut. (Used to improve electron tracking above this threshold).
+     MiniHoughLoadBalance = cms.uint32(0) # Load balancing disabled = 0; static load balancing of output links = 1; dynamic load balancing of output links = 2.
   ),
 
   #=== Rules governing how stubs are filled into the r-phi Hough Transform array.
@@ -286,11 +287,12 @@ TMTrackProducer_params = cms.PSet(
      # & SimpleLR is a linear regression fit that neglects the hit uncertainties. 
      # The number 4 or 5 in the name indicates if 4 or 5 helix parameters are fitted.
      # Options KF4ParamsComb, KF5ParamsComb or SimpleLR are the best ones.
-     # KF4ParamsCombHLS is the HLS version of the code, which only works if linked with Vivado libraries.
+     # KF*ParamsCombHLS is the HLS version of the code, which only works if linked with Vivado libraries.
      TrackFitters = cms.vstring(
                                 # "ChiSquared4ParamsApprox",
                                 # "SimpleLR",
                                 # "KF4ParamsCombHLS",
+                                # "KF5ParamsCombHLS",
                                 "KF5ParamsComb",
                                 "KF4ParamsComb"
                                 ),
@@ -381,7 +383,11 @@ TMTrackProducer_params = cms.PSet(
      # Remove requirement of at least 2 PS layers per track.
      KalmanRemove2PScut      = cms.bool(False),
      # Allow the KF to skip this many layers in total per track.
-     KalmanMaxSkipLayers     = cms.uint32(2),
+     KalmanMaxSkipLayersHard = cms.uint32(1), # For HT tracks with many stubs
+     KalmanMaxSkipLayersEasy = cms.uint32(2), # For HT tracks with few stubs
+     KalmanMaxStubsEasy      = cms.uint32(10), # Max stubs an HT track can have to be "easy".
+     # KF will consider at most this #stubs per layer to save time.
+     KalmanMaxStubsPerLayer  = cms.uint32(4),
      # Multiple scattering term - inflate hit phi errors by this divided by Pt
      # (0.00075 gives best helix resolution & 0.00450 gives best chi2 distribution).
      KalmanMultiScattTerm    = cms.double(0.00075), 
@@ -461,11 +467,9 @@ TMTrackProducer_params = cms.PSet(
     Other_skipTrackDigi = cms.bool( True ) 
   ),
 
-  TrackletSettings = cms.PSet(
-    Tracklet = cms.bool( False ),
-    LayerRadii = cms.vdouble( 25.1493, 37.468, 52.5977, 68.7737, 86.0591, 110.844 ),
-    DiskZ = cms.vdouble( 131.18, 155.0, 185.34, 221.619, 265.0 )
-    ),
+  #===== Use HYBRID TRACKING (Tracklet pattern reco + TMTT KF -- requires tracklet C++ too) =====
+  
+  Hybrid = cms.bool( False),
 
   #===== Debug printout & plots
   Debug  = cms.uint32(1), #(0=none, 1=print #tracks/event, 2+ print more info)

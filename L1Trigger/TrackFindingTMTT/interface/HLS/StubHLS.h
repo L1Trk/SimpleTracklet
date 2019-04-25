@@ -54,7 +54,8 @@ namespace KalmanHLS {
 
 enum B_STUB {BSR = 12+1, BSZ = 14+1, BSP=14, BSZ1 = BSZ - 1}; // nonants
 
-struct StubHLS {
+class StubHLS {
+public:
   typedef AP_UFIXED(BSR,BSR) TR;
   //  typedef AP_UFIXED(BSR,BSR) TR;
   typedef AP_FIXED(BSZ1,BSZ)  TZ;
@@ -65,6 +66,13 @@ struct StubHLS {
   TP phiS;
   // IRT: Maxeller transmits stub layerId (not reducedLayerId). I assume this can't be used for anything, so don't do it here.
   AP_UINT(1)       valid; // Used by external code to indicate if input data is valid.
+
+#ifdef PRINT_HLSARGS
+public:
+  void print(const char* text) const {
+    std::cout<<text<<" r="<<r<<" phiS="<<phiS<<" z="<<z/2<<std::endl;
+  }
+#endif
 };
 
 #ifdef CMSSW_GIT_HASH

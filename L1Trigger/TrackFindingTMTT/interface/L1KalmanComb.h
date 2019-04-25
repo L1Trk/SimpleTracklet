@@ -31,7 +31,7 @@ class L1KalmanComb : public TrackFitGeneric{
     public:
 	L1KalmanComb(const Settings* settings, const uint nPar, const string &fitterName="", const uint nMeas=2 );
 
-	virtual ~L1KalmanComb(){}
+	virtual ~L1KalmanComb() {this->resetStates();}
 
 	L1fittedTrack fit(const L1track3D& l1track3D);
 	void bookHists();
@@ -56,8 +56,6 @@ class L1KalmanComb : public TrackFitGeneric{
 	void deleteStubClusters();
 	const kalmanState *mkState( const L1track3D &candidate, unsigned skipped, unsigned layer, unsigned layerId, const kalmanState *last_state, 
 				    const std::vector<double> &x, const TMatrixD &pxx, const TMatrixD &K, const TMatrixD &dcov, const StubCluster* stubCluster, double chi2 );
-
-	virtual std::string getParams()=0;
 
     protected:
 	/* Methods */

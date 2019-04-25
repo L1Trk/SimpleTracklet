@@ -13,11 +13,23 @@ git fetch L1Trk SimpleTracklet
 git checkout -b myBranch L1Trk/SimpleTracklet
 ```
 
+# Running instructions
+# This produces a histogram file Hist.root & prints a job summary output of tracking performance.
+cd /L1Trigger/TrackFindingTMTT/test/
+cmsRun tmtt_tf_analysis_cfg.py
+
+# Configuration.
+# Switch between TMTT & Hybrid tracking by editing tmtt_tf_analysis_cfg.py.
+# (Load TMTrackProducer_Ultimate_cff.py for TMTT or HybridTrackProducer_cff.py for Hybrid).
 
 
-# **Instructions below are from the main TMTT repo, not necessarily needed or correct for working with the SimpleTracklet code**
 
+#==============================================================================================
 
+# Instructions below are from the main TMTT repo, not necessarily needed or correct for 
+# working with the SimpleTracklet code.
+
+#=============================================================================================
 
 # Setup instructions to just run
 

@@ -1,10 +1,10 @@
 #include "L1Trigger/TrackFindingTMTT/interface/TrackletSeed.h"
 #include "L1Trigger/TrackFindingTMTT/interface/Stub.h"
-#include "L1Trigger/TrackFindingTMTT/interface/Utility.h"
 #include "L1Trigger/TrackFindingTMTT/interface/StubCluster.h"
 #include "L1Trigger/TrackFindingTMTT/interface/TrackletProjection.h"
 #include <L1Trigger/TrackFindingTMTT/interface/Sector.h>
 
+#include "DataFormats/Math/interface/deltaPhi.h"
 
 using namespace std;
 namespace TMTT{
@@ -202,7 +202,7 @@ namespace TMTT{
  //////////////////////////////////////////////////////////////////////////////////////
  void TrackletSeed::seed(const Stub* outerStub, const Stub* innerStub, unsigned int seedType){ //Calculates initial helix parameters of tracklets
 
-  double deltaPhi = Utility::wrapRadian( innerStub->phi() - outerStub->phi() );
+  double deltaPhi = reco::deltaPhi( innerStub->phi(), outerStub->phi() );
 
   double displacement = sqrt( pow( outerStub->r(), 2 ) + pow( innerStub->r(), 2 )
     - 2*outerStub->r()*innerStub->r()*cos(deltaPhi));

@@ -45,7 +45,6 @@ InputData::InputData(const edm::Event& iEvent, const edm::EventSetup& iSetup, Se
   // Note if job will use MC truth info (or skip it to save CPU).
   enableMCtruth_ = settings->enableMCtruth();
 
-  
   // Get TrackingParticle info
 
   edm::Handle<TrackingParticleCollection> tpHandle;
@@ -123,8 +122,6 @@ InputData::InputData(const edm::Event& iEvent, const edm::EventSetup& iSetup, Se
       Stub stub(ttStubRef, stubCount, settings, trackerGeometry, trackerTopology );
       // Also fill truth associating stubs to tracking particles.
       if (enableMCtruth_) stub.fillTruth(translateTP, mcTruthTTStubHandle, mcTruthTTClusterHandle); 
-
-
       vAllStubs_.push_back( stub );
       stubCount++;
     }
