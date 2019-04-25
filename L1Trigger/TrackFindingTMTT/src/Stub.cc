@@ -25,7 +25,27 @@ string Stub::trackerGeometryVersion_ = "UNKNOWN";
 bool       Stub::stubKillerInit_ = false;
 StubKiller Stub::stubKiller_;
 
-//=== Store useful info about this stub.
+//=== Store useful info about the stub (for use with HYBRID code), with hard-wired constants to allow use outside CMSSW.
+
+Stub::Stub(double phi, double r, double z, double bend, int layerid, bool psModule, bool barrel, unsigned int iphi, double alpha, const Settings* settings, const TrackerTopology* trackerTopology, unsigned int ID) : 
+  phi_(phi), r_(r), z_(z), bend_(bend), iphi_(iphi), alpha_(alpha), psModule_(psModule), layerId_(layerid), barrel_(barrel), 
+  digitalStub_(settings), stubWindowSuggest_(settings)
+{ //work in progress on better constructor for new hybrid
+  if (psModule && barrel) {
+    double zMax[4];
+    settings->get_zMaxNonTilted(zMax);
+    tiltedBarrel_ = (fabs(z) > zMax[layerid]);
+  }
+  if (!psModule) {
+    stripPitch_ = settings->ssStripPitch(); nStrips_=settings->ssNStrips(); sigmaPar_=settings->ssStripLength()/std::sqrt(12.0);
+  } else {
+    stripPitch_ = settings->psStripPitch(); nStrips_=settings->psNStrips(); sigmaPar_=settings->psPixelLength()/std::sqrt(12.0);
+  }
+  sigmaPerp_ = stripPitch_/std::sqrt(12.0);
+  index_in_vStubs_ = ID; // A unique ID to label the stub.
+}
+
+//=== Store useful info about stub (for use with TMTT code).
 
 Stub::Stub(const TTStubRef& ttStubRef, unsigned int index_in_vStubs, const Settings* settings, 
            const TrackerGeometry*  trackerGeometry, const TrackerTopology*  trackerTopology) : 
@@ -231,14 +251,14 @@ void Stub::calcQoverPtrange() {
 }
 
 //=== Digitize stub for input to Geographic Processor, with digitized phi coord. measured relative to closest phi sector.
-//=== (This approximation is valid if their are an integer number of digitisation bins inside each phi octant).
-//=== However, you should also call digitizeForHTinput() before accessing digitized stub data, even if you only care about that going into GP! Otherwise, you will not identify stubs assigned to more than one octant.
+//=== (This approximation is valid if their are an integer number of digitisation bins inside each phi nonant).
+//=== However, you should also call digitizeForHTinput() before accessing digitized stub data, even if you only care about that going into GP! Otherwise, you will not identify stubs assigned to more than one nonant.
 
 void Stub::digitizeForGPinput(unsigned int iPhiSec) {
   if (settings_->enableDigitize()) {
 
     // Save CPU by not redoing digitization if stub was already digitized for this phi sector.
-    if ( ! (digitizedForGPinput_ && digitalStub_.iGetOctant(iPhiSec) == digitalStub_.iDigi_Octant()) ) {
+    if ( ! (digitizedForGPinput_ && digitalStub_.iGetNonant(iPhiSec) == digitalStub_.iDigi_Nonant()) ) {
 
       // Digitize
       digitalStub_.makeGPinput(iPhiSec);

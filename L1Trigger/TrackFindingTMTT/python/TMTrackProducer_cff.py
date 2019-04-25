@@ -12,38 +12,20 @@ import FWCore.ParameterSet.Config as cms
 #=== Import default values for all parameters & define EDProducer.
 
 from L1Trigger.TrackFindingTMTT.TMTrackProducer_Defaults_cfi import TMTrackProducer_params
+from L1Trigger.TrackFindingTMTT.Hybrid_Defaults_cfi import Hybrid_params
 
 TMTrackProducer = cms.EDProducer('TMTrackProducer',
   # Load cfg parameters from TMTrackProducer_Defaults_cfi.py
-  TMTrackProducer_params
+  TMTrackProducer_params,
+  Hybrid_params # Not used for pure TMTT
 )
 
 #===================================================================================================
 #=== Parameters changed from their default values.
 #===================================================================================================
 
-#--- Uncomment for Simple Tracklet 
-TMTrackProducer.TrackletSettings.Tracklet = cms.bool( True )
-TMTrackProducer.PhiSectors.NumPhiSectors = cms.uint32( 9 ) 
-# TMTrackProducer.PhiSectors.NumPhiOctants = cms.uint32( 9 )
-
-TMTrackProducer.DupTrkRemoval.DupTrkAlgFit = cms.uint32( 0 ) #need new DR algo for hybrid
-TMTrackProducer.StubDigitize.EnableDigitize = cms.bool( False ) #need new digitisation ranges for 9 sector hourglass
-
-TMTrackProducer.TrackFitSettings.KalmanMaxNumStubs  = cms.uint32(6)
-TMTrackProducer.TrackFitSettings.KalmanHOalpha      = cms.uint32(1)
-TMTrackProducer.TrackFitSettings.KalmanHOprojZcorr  = cms.uint32(1)
-TMTrackProducer.TrackFitSettings.KalmanHOdodgy      = cms.bool( False )
-TMTrackProducer.TrackFitSettings.KalmanRemove2PScut = cms.bool( True )
-TMTrackProducer.TrackFitSettings.KalmanMaxSkipLayers  = cms.uint32( 4 )
-TMTrackProducer.PhiSectors.ChosenRofPhi =  cms.double( 55 )
-TMTrackProducer.TrackFitSettings.KalmanDebugLevel        = cms.uint32(1)
-TMTrackProducer.PhiSectors.HandleStripsPhiSec = cms.bool(True)
-TMTrackProducer.TrackFitSettings.KalmanHOtilted          = cms.bool(True)
-TMTrackProducer.TrackFitSettings.KalmanHOhelixExp        = cms.bool(True)
-
 #--- Disable internal digitisation of SimpleLR fitter, as it was never retuned for nonants.
-#TMTrackProducer.TrackFitSettings.DigitizeSLR = cms.bool(False),
+TMTrackProducer.TrackFitSettings.DigitizeSLR = cms.bool(False)
 
 #===================================================================================================
 #=== All the following parameters already have identical values in TMTrackProducer_Defaults_cfi .
@@ -95,13 +77,13 @@ TMTrackProducer.TrackFitSettings.KalmanHOhelixExp        = cms.bool(True)
 
 #--- Reduce Pt threshold to 2 GeV, with coarse HT, followed  by Mini-HT.
 
-TMTrackProducer.HTArraySpecRphi.HoughNbinsPt        = cms.uint32(54)
-TMTrackProducer.HTArraySpecRphi.HoughNbinsPhi       = cms.uint32(64) 
-TMTrackProducer.GenCuts.GenMinPt                    = cms.double(2.0)
-TMTrackProducer.HTArraySpecRphi.HoughMinPt          = cms.double(2.0)
-TMTrackProducer.HTArraySpecRphi.MiniHoughMinPt      = cms.double(3.0) # Mini-HT not used below this Pt, to reduce sensitivity to scattering.
-TMTrackProducer.HTFillingRphi.BusySectorMbinRanges  = cms.vuint32(2,2,2,2,2,2,2,2,2,2,2,2,2,1, 27)   
-TMTrackProducer.HTFillingRphi.BusySectorMbinOrder   = cms.vuint32(0,28, 2,30, 4,32, 6,34, 8,36, 10,38, 12,40, 14,42, 16,44, 18,46, 20,48, 22,50, 24,52, 26, 1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35,37,39,41,43,45,47,49,51,53)
+#TMTrackProducer.HTArraySpecRphi.HoughNbinsPt        = cms.uint32(54)
+#TMTrackProducer.HTArraySpecRphi.HoughNbinsPhi       = cms.uint32(64) 
+#TMTrackProducer.GenCuts.GenMinPt                    = cms.double(2.0)
+#TMTrackProducer.HTArraySpecRphi.HoughMinPt          = cms.double(2.0)
+#TMTrackProducer.HTArraySpecRphi.MiniHoughMinPt      = cms.double(3.0) # Mini-HT not used below this Pt, to reduce sensitivity to scattering.
+#TMTrackProducer.HTFillingRphi.BusySectorMbinRanges  = cms.vuint32(2,2,2,2,2,2,2,2,2,2,2,2,2,1, 27)   
+#TMTrackProducer.HTFillingRphi.BusySectorMbinOrder   = cms.vuint32(0,28, 2,30, 4,32, 6,34, 8,36, 10,38, 12,40, 14,42, 16,44, 18,46, 20,48, 22,50, 24,52, 26, 1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35,37,39,41,43,45,47,49,51,53)
 
 #--- Additional Mini-HT options to improve electron/displaced tracking.
 
@@ -175,12 +157,3 @@ TMTrackProducer.HTFillingRphi.BusySectorMbinOrder   = cms.vuint32(0,28, 2,30, 4,
 #--- Switch on FPGA-friendly approximation to B parameter in GP - will be used in future GP firmware.
 #--- (used to relate track angle dphi to stub bend) 
 #TMTrackProducer.GeometricProc.UseApproxB           = cms.bool(True)
-
-#--- Use octants instead of nonants. 
-
-#TMTrackProducer.PhiSectors.NumPhiOctants      = cms.uint32(8)   
-#TMTrackProducer.PhiSectors.NumPhiSectors      = cms.uint32(16)   
-#TMTrackProducer.HTArraySpecRphi.HoughNbinsPt  = cms.uint32(32)   
-#TMTrackProducer.HTArraySpecRphi.HoughNbinsPhi = cms.uint32(16)  
-#TMTrackProducer.HTFillingRphi.BusySectorMbinRanges = cms.vuint32(2,2,2,2,2,2,2,2)
-#TMTrackProducer.HTFillingRphi.BusySectorMbinOrder  = cms.vuint32(0,8, 1,9, 2,10, 3,11, 4,12, 5,13, 6,14, 7,15)

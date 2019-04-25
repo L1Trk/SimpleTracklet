@@ -24,12 +24,12 @@ process.load("FWCore.MessageLogger.MessageLogger_cfi")
 options = VarParsing.VarParsing ('analysis')
 
 #--- Specify input MC
-options.register('inputMC', 'MCsamples/937/RelVal/TTbar/PU200.txt',
+#options.register('inputMC', 'MCsamples/937/RelVal/TTbar/PU200.txt',
 #options.register('inputMC', 'MCsamples/1020/RelVal/TTbar/PU200_D17.txt',
 #options.register('inputMC', 'MCsamples/1020/RelVal/TTbar/PU200_D21.txt',
 
 # Fastest to use a local copy ...
-#options.register('inputMC', 'MCsamples/937/RelVal/TTbar/localRAL/PU200.txt', 
+options.register('inputMC', 'MCsamples/937/RelVal/TTbar/localRAL/PU200.txt', 
 
 VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "Files to be processed")
 
@@ -81,7 +81,8 @@ process.source = cms.Source ("PoolSource",
 process.Timing = cms.Service("Timing", summaryOnly = cms.untracked.bool(True))
 
 #--- Load code that produces our L1 tracks and makes corresponding histograms.
-process.load('L1Trigger.TrackFindingTMTT.TMTrackProducer_cff')
+#process.load('L1Trigger.TrackFindingTMTT.TMTrackProducer_Ultimate_cff') # Pure TMTT algo
+process.load('L1Trigger.TrackFindingTMTT.HybridTrackProducer_cff') # Hybrid algo
 
 #--- Alternative cfg including improvements not yet in the firmware. Aimed at L1 trigger studies.
 #process.load('L1Trigger.TrackFindingTMTT.TMTrackProducer_Ultimate_cff')

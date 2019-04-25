@@ -141,17 +141,6 @@ const TP* Utility::matchingTP(const Settings* settings, const vector<const Stub*
   return tpBest;
 }
 
-double Utility::wrapRadian( double t ){
-
-    if( t > 0 ){
-	while( t > M_PI ) t-= 2*M_PI; 
-    }
-    else{
-	while( t < - M_PI ) t+= 2*M_PI; 
-    }
-    return t;
-}
-
 //=== Determine the minimum number of layers a track candidate must have stubs in to be defined as a track.
 //=== The first argument indicates from what type of algorithm this function is called: "HT", "SEED", "DUP" or "FIT".
 
@@ -191,4 +180,5 @@ unsigned int Utility::numLayerCut(string algo, const Settings* settings, unsigne
     throw cms::Exception("Utility::numLayerCut() called with invalid algo argument!")<<algo<<endl;
   }
 }
+
 }

@@ -27,8 +27,7 @@ namespace Utility {
   // By default, considers both PS+2S modules, but optionally considers only the PS ones if onlyPS = true.
   
   unsigned int countLayers(const Settings* settings, const vector<const Stub*>& stubs, bool disableReducedLayerID = false, bool onlyPS = false);
-  
-  double wrapRadian(double t);
+
   // Given a set of stubs (presumably on a reconstructed track candidate)
   // return the best matching Tracking Particle (if any),
   // the number of tracker layers in which one of the stubs matched one from this tracking particle,

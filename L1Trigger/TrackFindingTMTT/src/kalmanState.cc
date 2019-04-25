@@ -46,8 +46,6 @@ kalmanState::kalmanState( const L1track3D& candidate, unsigned n_skipped, unsign
 
     fitter_ = fitter;
     fXtoTrackParams_ = f;
-
-
 }
 
 kalmanState::kalmanState(const kalmanState &p){
@@ -178,6 +176,7 @@ void kalmanState::dump( ostream &os, const TP *tp, bool all )const
     os << "kalmanState : ";
     os << "next Kalman layer = " << kLayerNext_ << ", ";
     os << "layerId = " << layerId_ << ", ";
+    os << " n_skipped = " << n_skipped_ << ", ";
     os << "barrel = " << barrel_ << ", ";
     os << "endcapRing = " << endcapRing_ << ", ";
     os << "r = " << r_ << ", "; 
@@ -197,7 +196,7 @@ void kalmanState::dump( ostream &os, const TP *tp, bool all )const
     std::vector<const Stub *> stub_list = stubs();
     for( auto &stub : stub_list ){
 	os << "              stub ";
-	os << "[" << stub << "] "; 
+	//	os << "[" << stub << "] "; 
 	os << "index : " << stub->index() << " ";
 	os << "layerId : " << stub->layerId() << " ";
 	os  << "[r,phi,z] = ";
